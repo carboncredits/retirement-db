@@ -3,7 +3,6 @@
  (public_name 4c-retirement)
  (libraries
   eio_main
-  irmin-cli
   lwt_eio
   fmt.tty
   fmt.cli
