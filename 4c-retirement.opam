@@ -1,0 +1,29 @@
+opam-version: "2.0"
+maintainer:   "pf341@cam.ac.uk"
+authors:      ["Patrick Ferris"]
+license:      "ISC"
+homepage:     "https://github.com/carboncredits/<TODO>"
+bug-reports:  "https://github.com/carboncredits/<TODO>/issues"
+dev-repo:     "git+https://github.com/carboncredits/<TODO>.git"
+build: [
+ ["dune" "subst"] {dev}
+ ["dune" "build" "-p" name "-j" jobs]
+ ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+depends: [
+  "dune"          {>= "2.9.0"}
+  "irmin"         {>= "3.3.0"}
+  "irmin-git"     {>= "3.3.0"}
+  "irmin-graphql" {>= "3.3.0"}
+  "eio_main"      {>= "0.4"}
+  "logs"
+  "lwt"           {>= "5.3.0"}
+  "alcotest"      {with-test}
+]
+synopsis: "Project metadata server"
+pin-depends: [
+    [ "eio_luv.0.4" "git+https://github.com/patricoferris/eio#499963077745290812fa8cc4bfa37018e8e14850" ]
+    [ "irmin.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01" ]
+    [ "irmin-git.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01" ]
+    [ "irmin-graphql.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01" ]
+]

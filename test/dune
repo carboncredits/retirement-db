@@ -1,0 +1,7 @@
+(test
+ (name test)
+ (deps
+  (source_tree versions))
+ (libraries eio_main alcotest retirement))
+
+(data_only_dirs versions)
