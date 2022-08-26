@@ -28,6 +28,8 @@ synopsis: "Project metadata server"
 pin-depends: [
     [ "eio.0.4" "git+https://github.com/ocaml-multicore/eio#8beda18c9950aa8f0230b9f699d47b8d7bfe214a" ]
     [ "eio_luv.0.4" "git+https://github.com/ocaml-multicore/eio#8beda18c9950aa8f0230b9f699d47b8d7bfe214a" ]
+    [ "eio_linux.0.4" "git+https://github.com/ocaml-multicore/eio#8beda18c9950aa8f0230b9f699d47b8d7bfe214a" ]
+    [ "eio_main.0.4" "git+https://github.com/ocaml-multicore/eio#8beda18c9950aa8f0230b9f699d47b8d7bfe214a" ]
     [ "irmin.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01" ]
     [ "irmin-git.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01" ]
     [ "irmin-graphql.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01" ]
