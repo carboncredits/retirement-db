@@ -16,14 +16,20 @@ depends: [
   "irmin-git"     {>= "3.3.0"}
   "irmin-graphql" {>= "3.3.0"}
   "eio_main"      {>= "0.4"}
+  "bisect_ppx"    {= "dev"}
   "logs"
+  "dune-build-info"
+  "ppx_deriving_yojson"
   "lwt"           {>= "5.3.0"}
+  "lwt_eio"       {>= "0.2"}
   "alcotest"      {with-test}
 ]
 synopsis: "Project metadata server"
 pin-depends: [
-    [ "eio_luv.0.4" "git+https://github.com/patricoferris/eio#499963077745290812fa8cc4bfa37018e8e14850" ]
+    [ "eio.0.4" "git+https://github.com/ocaml-multicore/eio#8beda18c9950aa8f0230b9f699d47b8d7bfe214a" ]
+    [ "eio_luv.0.4" "git+https://github.com/ocaml-multicore/eio#8beda18c9950aa8f0230b9f699d47b8d7bfe214a" ]
     [ "irmin.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01" ]
     [ "irmin-git.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01" ]
     [ "irmin-graphql.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01" ]
+    [ "bisect_ppx.dev" "git+https://github.com/patricoferris/bisect_ppx#1901191edf2ebd6a9161e4bf828a0d24c2124f3f"]
 ]

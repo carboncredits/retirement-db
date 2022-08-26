@@ -5,8 +5,9 @@ RUN sudo apk add gmp-dev libffi-dev linux-headers
 COPY --chown=opam 4c-retirement.opam /src/
 RUN opam pin -yn /src/
 WORKDIR /src
-RUN opam install -y --deps-only .
+RUN opam install -y --deps-only --with-test .
 ADD --chown=opam . .
+RUN opam exec -- dune build @runtest
 RUN opam exec -- dune build --profile release ./_build/install/default/bin/4c-retirement
 
 FROM alpine:3.15
