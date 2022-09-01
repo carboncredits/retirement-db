@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  irmin-db:
+  irmin:
     build:
       context: .
     command: serve --directory=./var --port=9090 --verbosity=info
@@ -11,6 +11,6 @@ services:
       context: .
       dockerfile: Dockerfile.test
     environment:
-      - SERVER_HOST=irmin-db
+      - SERVER_HOST=irmin
     profiles:
       - test

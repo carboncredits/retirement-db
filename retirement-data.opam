@@ -20,5 +20,5 @@ depends: [
 synopsis: "Project metadata JSON codec and types"
 pin-depends:[
   ["ppx_irmin.3.3.1" "git+https://github.com/patricoferris/irmin#9f2e20dd7669b00fe48b8d188e07731bfb39ce01"]
-  ["ppx_deriving_graphql.dev" "git+https://github.com/patricoferris/ppx_deriving_graphql#7f283307d63bc9d504df507f420699ac6f224b84"]
+  ["ppx_deriving_graphql.dev" "git+https://github.com/patricoferris/ppx_deriving_graphql#aec4c67442f63a54dc6d0da118c3a729042f8820"]
 ]

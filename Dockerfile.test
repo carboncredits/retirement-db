@@ -7,4 +7,5 @@ RUN opam pin -yn /src/
 WORKDIR /src
 RUN opam install -y --deps-only --with-test .
 ADD --chown=opam . .
-RUN opam exec -- dune build && /src/_build/default/test/e2e/test_client.exe
+RUN opam exec -- dune build
+ENTRYPOINT [ "/src/_build/default/test/e2e/test_client.exe" ]

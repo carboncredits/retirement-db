@@ -11,8 +11,8 @@ RUN opam exec -- dune build @runtest
 RUN opam exec -- dune build --profile release ./_build/install/default/bin/retirement
 
 FROM alpine:3.15
-RUN apk update && apk add curl git
+RUN apk update && apk add gmp-dev libffi-dev libexecinfo-dev linux-headers curl git
 WORKDIR /var/lib/retirement
-EXPOSE 8080
+EXPOSE 9090
 ENTRYPOINT ["/usr/local/bin/retirement"]
 COPY --from=build /src/_build/install/default/bin/retirement /usr/local/bin/
