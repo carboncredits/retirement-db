@@ -33,8 +33,8 @@ module Make (S : Project_store) = struct
       :> (unit, add_error) Lwt_result.t)
 
   let add_project_json ?msg store path json =
-    match Data.of_yojson json with
-    | Error s -> Error (`Msg s)
+    match Data.of_string json with
+    | Error _ as e -> (e :> (unit, add_error) result)
     | Ok p -> Lwt_eio.Promise.await_lwt (add_project_lwt ?msg store path p)
 
   let add_project ?msg store path project =

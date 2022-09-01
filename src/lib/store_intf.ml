@@ -21,7 +21,7 @@ module type S = sig
   type add_error = [ `Msg of string | I.write_error ]
 
   val add_project_json :
-    ?msg:string -> I.t -> I.path -> Yojson.Safe.t -> (unit, add_error) result
+    ?msg:string -> I.t -> I.path -> string -> (unit, add_error) result
   (** Add a project from raw JSON. This will try to parse the JSON into a project
       and may fail to do so, otherwise the failure is to do with persisting the
       data to the store. *)

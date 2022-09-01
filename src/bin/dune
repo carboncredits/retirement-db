@@ -1,6 +1,7 @@
 (executable
  (name main)
- (public_name 4c-retirement)
+ (package retirement)
+ (public_name retirement)
  (libraries
   eio_main
   lwt_eio

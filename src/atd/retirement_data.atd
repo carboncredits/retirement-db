@@ -1,0 +1,111 @@
+<doc text="Retirement Data Types">
+
+type version <ocaml attr="deriving irmin,graphql"> = { major: int; minor: int; ?patch: int option }
+
+type flight_trip <ocaml attr="deriving irmin,graphql"> = [
+    | None <json name="none">
+    | One_way <json name="one-way">
+    | Round_trip <json name="round-trip">
+]
+
+type flight_class <ocaml attr="deriving irmin,graphql"> = [
+    | First <json name="first">
+    | Business <json name="business">
+    | Premium_economy <json name="premium-economy">
+    | Economy <json name="economy">
+]
+
+type flight_type <ocaml attr="deriving irmin,graphql"> = [
+    | Scheduled <json name="scheduled">
+    | Chartered <json name="chartered">
+]
+
+type airport <ocaml attr="deriving irmin,graphql"> = {
+    code : string;
+    lat : float;
+    lng : float;
+    name : string;
+    city : string;
+}
+
+type flight_details <ocaml attr="deriving irmin,graphql"> = {
+    origin : airport;
+    destination : airport;
+    via : airport list;
+    flight_class <json name="flightClass"> : flight_class;
+    flight_type <json name="flightType"> : flight_type;
+    aircraft_type <json name="aircraftType"> : string;
+    number_of_people <json name="numberOfPeople"> : int;
+}
+
+type train_class <ocaml attr="deriving irmin,graphql"> = [ 
+    | Standard <json name="standard">
+    | First_class <json name="first-class">
+]
+
+type train_details <ocaml attr="deriving irmin,graphql"> = {
+    origin : string;
+    destination : string;
+    via : string list;
+    train_class <json name="trainClass"> : train_class;
+    train_type <json name="trainType"> : string option;
+    number_of_people <json name="numberOfPeople"> : int;
+}
+
+type journey_time <ocaml attr="deriving irmin,graphql"> = [
+    | Zero_to_five <json name="0-5m"> 
+    | Five_to_ten <json name="5-10m"> 
+    | Ten_to_twenty_five <json name="10-25m"> 
+    | Twenty_five_to_fifty <json name="25-50m"> 
+    | Fifty_plus <json name="50m+"> 
+]
+
+type taxi_type <ocaml attr="deriving irmin,graphql"> = [
+    | Electric <json name="electric"> 
+    | Hybrid <json name="hybrid"> 
+    | Standard <json name="standard"> 
+    | Executive <json name="executive"> 
+    | Airport_shuttle <json name="airport shuttle"> 
+]
+
+type taxi_details <ocaml attr="deriving irmin,graphql"> = {
+    journey_time <json name="journeyTime"> : journey_time;
+    number_of_people <json name="numberOfPeople"> : int;
+    taxi_type <json name="taxiType"> : taxi_type;
+}
+
+type additional_details <ocaml attr="deriving irmin,graphql"> = {
+    journey_time <json name="journeyTime"> : journey_time;
+    number_of_people <json name="numberOfPeople"> : int;
+    type' <json name="type"> : string;
+}
+
+type reason <ocaml attr="deriving irmin,graphql"> = [
+    | Conference <json name="Conference">
+    | Meeting_with_collaborators <json name="Meeting with collaborators">
+    | Giving_an_invited_talk <json name="Giving an invited talk/lecture">
+    | PhD_viva <json name="PhD viva"> 
+    | Fundraising_activities <json name="Fundraising activities">
+    | Recruitment_of_university_staff <json name="Recruitment of university staff">
+    | Research <json name="Research">
+    | Student_field_trip <json name="Student field trip">
+    | Administrative_meetings <json name="Administrative meetings">
+    | Other <json name="Other">
+]
+
+type travel_details <ocaml attr="deriving irmin,graphql"> = {
+    flight_trip_type <json name="flightTripType"> : flight_trip;
+    ?outbound_details <json name="outboundDetails"> : flight_details option;
+    ?inbound_details <json name="inboundDetails"> : flight_details option;
+    train_details <json name="trainDetails"> : train_details list;
+    taxi_details <json name="taxiDetails"> : taxi_details list;
+    additional_details <json name="additionalDetails"> : additional_details list;
+    primary_reason <json name="primaryReason"> : reason;
+    ?secondary_reason <json name="secondaryReason"> : reason option;
+    reason_text <json name="reasonText"> : string;
+}
+
+type t <ocaml attr="deriving irmin,graphql"> = {
+    version : version;
+    details : travel_details;
+}

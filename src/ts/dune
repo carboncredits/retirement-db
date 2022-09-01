@@ -1,0 +1,6 @@
+(rule
+ (targets retirement_data.ts)
+ (deps %{project_root}/src/atd/retirement_data.atd)
+ (mode promote)
+ (action
+  (run atdts %{deps})))

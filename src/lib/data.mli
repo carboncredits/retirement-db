@@ -1,28 +1,28 @@
-module Version : sig
-  type t = [ `v0 ] [@@deriving irmin]
-  (** Versioning of the data stored in the Irmin repository *)
+type t
+(** A type representing retirement data. *)
 
-  val latest : t
-  (** The latest version *)
-
-  include Irmin_graphql.Server.CUSTOM_TYPE with type t := t
-end
-
-type t [@@deriving irmin, yojson]
-(** A type for retirement data *)
-
-val v : Yojson.Safe.t -> t
-(** A new retirement data, TODO: Type the raw JSON! For now we serialise
-    the data and store the raw JSON (except for the version information) *)
-
-val version : t -> Version.t
-(** The version of the retirement data *)
-
-val json : t -> Yojson.Safe.t
-(** The payload of raw JSON *)
+val of_string : string -> (t, [ `Msg of string ]) result
+(** Parses raw JSON from string into a retirement data. *)
 
 val pp : t Fmt.t
 (** A pretty printer for retirement data *)
+
+val details : t -> Retirement_data.Types.travel_details
+(** [details t] returns the travel details associated with the retirement. *)
+
+val version : t -> Retirement_data.Types.version
+(** [version t] returns the version of the retirement data. *)
+
+val raw_version : string -> Retirement_data.Types.version option
+(** [raw_version json] will try to extract the version information from a raw
+    piece of JSON. *)
+
+val v :
+  ?version:Retirement_data.Types.version ->
+  Retirement_data.Types.travel_details ->
+  t
+(** [v ?version details] constructs a new retirement data. If [version] is omitted, the 
+    latest version will be used. *)
 
 include Irmin.Contents.S with type t := t
 include Irmin_graphql.Server.CUSTOM_TYPE with type t := t

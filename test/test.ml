@@ -14,8 +14,22 @@ end
 
 module Store = Store.Make (Irmin_store)
 
+let dummy_details =
+  Retirement_data.Types.
+    {
+      flight_trip_type = `None;
+      outbound_details = None;
+      inbound_details = None;
+      train_details = [];
+      taxi_details = [];
+      additional_details = [];
+      primary_reason = `Conference;
+      secondary_reason = None;
+      reason_text = "Some reason for travelling!";
+    }
+
 let projects =
-  [ ([ "a" ], Data.v (`String "hello")); ([ "b" ], Data.v (`String "hello")) ]
+  [ ([ "a" ], Data.v dummy_details); ([ "b" ], Data.v dummy_details) ]
 
 let add_projects store =
   List.iter
@@ -40,10 +54,10 @@ let test_backwards_compat dir () =
   List.iter
     (fun file ->
       let s = Eio.Path.(load (dir / file)) in
-      let project = Data.of_yojson (Yojson.Safe.from_string s) in
+      let project = Data.of_string s in
       match project with
       | Ok _ -> ()
-      | Error s -> Alcotest.fail ("Parsing failed with: " ^ s))
+      | Error (`Msg s) -> Alcotest.fail ("Parsing failed with: " ^ s))
     files
 
 let test_read () =

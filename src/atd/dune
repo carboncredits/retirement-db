@@ -1,0 +1,18 @@
+(rule
+ (targets retirement_data_t.ml retirement_data_t.mli)
+ (deps retirement_data.atd)
+ (action
+  (run atdgen -t %{deps} -open Gql)))
+
+(rule
+ (targets retirement_data_j.ml retirement_data_j.mli)
+ (deps retirement_data.atd)
+ (action
+  (run atdgen -j %{deps} -open Gql)))
+
+(library
+ (name retirement_data)
+ (public_name retirement-data)
+ (libraries yojson atdgen-runtime irmin graphql-lwt)
+ (preprocess
+  (pps ppx_irmin ppx_deriving_graphql)))

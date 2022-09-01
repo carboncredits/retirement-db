@@ -1,4 +1,3 @@
-open Lwt.Syntax
 open Retirement
 
 let await = Lwt_eio.Promise.await_lwt
@@ -117,9 +116,9 @@ let port =
   Arg.value @@ Arg.opt Arg.int 8080
   @@ Arg.info ~doc:"The port to run the server on" ~docv:"PORT" [ "port" ]
 
-let serve' ?remote ~dir ~src ~port () =
+let serve' ?remote ~dir ~src:_ ~port () =
   let server = server dir remote in
-  let* ctx = Conduit_lwt_unix.init ~src () in
+  let ctx = Lazy.force Conduit_lwt_unix.default_ctx in
   let on_exn exn = Logs.err (fun f -> f "Error: %a" Fmt.exn exn) in
   let ctx = Cohttp_lwt_unix.Net.init ~ctx () in
   Logs.info (fun f -> f "Server running at http://localhost:%i" port);
@@ -132,7 +131,7 @@ let serve _fs =
   let doc = "Serve a project repository over a GraphQL interface" in
   let info = Cmd.info "serve" ~doc in
   Cmd.v info
-  @@ Term.(const serve $ logs $ remote $ directory $ const "localhost" $ port)
+  @@ Term.(const serve $ logs $ remote $ directory $ const "::" $ port)
 
 let cmds env =
   let fs = Eio.Stdenv.fs env in
