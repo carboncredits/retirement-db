@@ -10,5 +10,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+    environment:
+      - SERVER_HOST=irmin-db
     profiles:
       - test

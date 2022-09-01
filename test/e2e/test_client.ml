@@ -106,11 +106,11 @@ let set_and_get_hash uri =
 
 let () =
   let uri =
-    try Sys.argv.(1)
-    with Invalid_argument _ -> "http://127.0.0.1:9090/graphql"
+    try Sys.getenv "SERVER_HOST"
+    with Not_found -> "http://127.0.0.1:9090"
   in
   let exec f () = Lwt_main.run f in
-  let uri = Uri.of_string uri in
+  let uri = Uri.(with_path (of_string uri) "graphql") in
   Alcotest.run "retirement-db-e2e"
     [
       ( "basic",
