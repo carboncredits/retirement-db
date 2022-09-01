@@ -10,6 +10,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
-    command: dune runtest && _build/default/test/e2e/test_client.exe "http://irmin-db:9090/graphql"
     profiles:
       - test
