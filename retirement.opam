@@ -2,27 +2,28 @@ opam-version: "2.0"
 maintainer:   "pf341@cam.ac.uk"
 authors:      ["Patrick Ferris"]
 license:      "ISC"
-homepage:     "https://github.com/carboncredits/<TODO>"
-bug-reports:  "https://github.com/carboncredits/<TODO>/issues"
-dev-repo:     "git+https://github.com/carboncredits/<TODO>.git"
+homepage:     "https://github.com/carboncredits/retirement-db"
+bug-reports:  "https://github.com/carboncredits/retirement-db/issues"
+dev-repo:     "git+https://github.com/carboncredits/retirement-db.git"
 build: [
  ["dune" "subst"] {dev}
  ["dune" "build" "-p" name "-j" jobs]
  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 depends: [
-  "dune"          {>= "2.9.0"}
-  "irmin"         {>= "3.3.0"}
-  "irmin-git"     {>= "3.3.0"}
-  "irmin-graphql" {>= "3.3.0"}
-  "eio_main"      {>= "0.4"}
-  "bisect_ppx"    {= "dev"}
+  "dune"               {>= "2.9.0"}
+  "retirement-data"    {= version}
+  "irmin"              {>= "3.3.0"}
+  "irmin-git"          {>= "3.3.0"}
+  "irmin-graphql"      {>= "3.3.0"}
+  "eio_main"           {>= "0.4"}
+  "bisect_ppx"         {= "dev"}
   "logs"
   "dune-build-info"
   "ppx_deriving_yojson"
-  "lwt"           {>= "5.3.0"}
-  "lwt_eio"       {>= "0.2"}
-  "alcotest"      {with-test}
+  "lwt"                {>= "5.3.0"}
+  "lwt_eio"            {>= "0.2"}
+  "alcotest"           {with-test}
 ]
 synopsis: "Project metadata server"
 pin-depends: [

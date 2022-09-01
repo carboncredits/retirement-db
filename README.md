@@ -1,7 +1,17 @@
 4c-retirement-db
 ----------------
 
-The Irmin database and server for 4c-retirement data. To get up and running with the project make sure you have `opam` installed and run `opam update`. Then:
+The Irmin database and server for 4c-retirement data. 
+
+## Structure
+
+The shape of retirement data is described in `src/atd` using [Adaptable Type Definitions](https://github.com/ahrefs/atd). This allows us to have a single source of types and generate programming-language-specific APIs automatically. `src/ts` contains Typescript bindings and `src/atd` contains OCaml bindings.
+
+The `src/lib` directory is a wrapper around these bindings for producing an Irmin store and `src/bin` is executable for running the Irmin store using a Unix filesystem backend.
+
+## Up and running
+
+To get up and running with the project make sure you have `opam` installed and run `opam update`. Then:
 
 ```bash
 opam switch create 5.0.0~alpha1

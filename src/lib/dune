@@ -1,6 +1,6 @@
 (library
  (name retirement)
- (public_name 4c-retirement)
- (libraries irmin irmin-git irmin-graphql lwt_eio)
+ (public_name retirement)
+ (libraries irmin irmin-git irmin-graphql lwt_eio retirement-data)
  (preprocess
   (pps ppx_irmin ppx_deriving_yojson)))
