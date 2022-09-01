@@ -1,0 +1,3 @@
+(executable
+ (name test_client)
+ (libraries alcotest retirement retirement-data cohttp-lwt-unix))

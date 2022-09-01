@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  irmin-db:
+    build:
+      context: .
+    command: serve --directory=./var --port=9090 --verbosity=info
+    profiles:
+      - setup
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    command: dune runtest && _build/default/test/e2e/test_client.exe "http://irmin-db:9090/graphql"
+    profiles:
+      - test

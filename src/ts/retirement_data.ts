@@ -11,7 +11,7 @@
 export type Version = {
   major: Int;
   minor: Int;
-  patch: Option<Int>;
+  patch?: Int;
 }
 
 export type FlightTrip =
@@ -119,7 +119,7 @@ export function writeVersion(x: Version, context: any = x): any {
   return {
     'major': _atd_write_required_field('Version', 'major', _atd_write_int, x.major, x),
     'minor': _atd_write_required_field('Version', 'minor', _atd_write_int, x.minor, x),
-    'patch': _atd_write_required_field('Version', 'patch', _atd_write_option(_atd_write_int), x.patch, x),
+    'patch': _atd_write_optional_field(_atd_write_int, x.patch, x),
   };
 }
 
@@ -127,7 +127,7 @@ export function readVersion(x: any, context: any = x): Version {
   return {
     major: _atd_read_required_field('Version', 'major', _atd_read_int, x['major'], x),
     minor: _atd_read_required_field('Version', 'minor', _atd_read_int, x['minor'], x),
-    patch: _atd_read_required_field('Version', 'patch', _atd_read_option(_atd_read_int), x['patch'], x),
+    patch: _atd_read_optional_field(_atd_read_int, x['patch'], x),
   };
 }
 

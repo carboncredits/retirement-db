@@ -132,7 +132,7 @@ let serve _fs =
   let doc = "Serve a project repository over a GraphQL interface" in
   let info = Cmd.info "serve" ~doc in
   Cmd.v info
-  @@ Term.(const serve $ logs $ remote $ directory $ const "localhost" $ port)
+  @@ Term.(const serve $ logs $ remote $ directory $ const "::" $ port)
 
 let cmds env =
   let fs = Eio.Stdenv.fs env in
