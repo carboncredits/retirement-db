@@ -45,7 +45,7 @@ let set_data ~reason =
   Fmt.str
     {|
   mutation {
-    set(info: {parents: [], allow_empty: false, retries: 1, message: "Hello", author: "Me"}, value: {version: { major: 0, minor: 1 }, 
+    test_set_and_get(info: {parents: [], allow_empty: false, retries: 1, message: "Hello", author: "Me"}, set: {version: { major: 0, minor: 1 }, 
       details: {
           flightTripType: "None",
           trainDetails: [],
@@ -56,6 +56,9 @@ let set_data ~reason =
       }
   }, path: "hello/world", branch: "main") {
       hash
+      info {
+        message
+      }
     }
   }
 |}
@@ -78,7 +81,7 @@ let set_and_get_hash uri =
   let reason = "Test number 1" in
   let* content = graphql_req_to_json uri (set_data ~reason) in
   let commit =
-    content / "data" / "set" / "hash" |> Yojson.Safe.Util.to_string
+    content / "data" / "test_set_and_get" / "hash" |> Yojson.Safe.Util.to_string
   in
   let* value =
     graphql_req_to_json uri
@@ -106,7 +109,9 @@ let set_and_get_hash uri =
 
 let () =
   let uri =
-    try Uri.make ~scheme:"http" ~host:(Sys.getenv "SERVER_HOST") ~port:9090 ~path:"graphql" ()
+    try
+      Uri.make ~scheme:"http" ~host:(Sys.getenv "SERVER_HOST") ~port:9090
+        ~path:"graphql" ()
     with Not_found -> Uri.of_string "http://127.0.0.1:9090/graphql"
   in
   let exec f () = Lwt_main.run f in
