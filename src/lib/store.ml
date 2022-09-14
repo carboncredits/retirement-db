@@ -42,6 +42,22 @@ module Make (S : Project_store) = struct
 
   let get_project_lwt s path = I.get s path
   let get_project s path = get_project_lwt s path |> await
+
+  let get_all_lwt s path =
+    let open Lwt.Syntax in
+    let* items = I.list s path in
+    let+ items =
+      Lwt_list.map_s
+        (fun (s, t) ->
+          let+ t' = S.Tree.to_concrete t in
+          (s, t'))
+        items
+    in
+    List.fold_left
+      (fun acc -> function _, `Contents (c, _) -> c :: acc | _ -> acc)
+      [] items
+
+  let get_all s path = get_all_lwt s path |> await
   let find_project_lwt s path = I.find s path
   let find_project s path = find_project_lwt s path |> await
 end

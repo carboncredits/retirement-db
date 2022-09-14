@@ -4,6 +4,9 @@ type t
 val of_string : string -> (t, [ `Msg of string ]) result
 (** Parses raw JSON from string into a retirement data. *)
 
+val to_json_string : t -> string
+(** Serialises the data to a JSON string *)
+
 val pp : t Fmt.t
 (** A pretty printer for retirement data *)
 

@@ -36,7 +36,10 @@ let fetch db remote =
   | Error e ->
       Logs.err (fun f -> f "Failed to fetch with %a" Store.Sync.pp_pull_error e)
 
-let callback schema _conn req body =
+let json_headers =
+  Cohttp.Header.of_list [ ("Content-Type", "application/json") ]
+
+let callback main schema _conn req body =
   let open Cohttp_lwt in
   let open Lwt.Syntax in
   match
@@ -70,6 +73,25 @@ let callback schema _conn req body =
           ~body:Cohttp_lwt.Body.empty ()
       in
       `Response r
+  | `GET, [ "json"; year; month ] ->
+      let buffer = Buffer.create 1028 in
+      Buffer.add_string buffer "[";
+      let items =
+        Store.get_all main [ year; month ] |> List.map Data.to_json_string
+      in
+      let () =
+        List.iter
+          (fun v ->
+            Buffer.add_string buffer v;
+            Buffer.add_string buffer ",")
+          items
+      in
+      Buffer.add_string buffer "]";
+      let+ r =
+        Cohttp_lwt_unix.Server.respond_string ~headers:json_headers ~status:`OK
+          ~body:(Buffer.contents buffer) ()
+      in
+      `Response r
   | _meth, s ->
       let* b = Cohttp_lwt.Body.to_string body in
       Logs.info (fun f ->
@@ -87,7 +109,9 @@ let server dir remote =
   | Some remote -> fetch (Store.of_branch s) remote
   | _ -> ());
   let schema = Server.schema s in
-  Cohttp_lwt_unix.Server.make_response_action ~callback:(callback schema) ()
+  let main = Store.of_branch s in
+  Cohttp_lwt_unix.Server.make_response_action ~callback:(callback main schema)
+    ()
 
 open Cmdliner
 
@@ -112,6 +136,12 @@ let directory =
   @@ Arg.info ~doc:"The directory on the filesystem to use for the repository"
        ~docv:"DIRECTORY" [ "directory" ]
 
+let path =
+  Arg.required
+  @@ Arg.opt Arg.(some string) None
+  @@ Arg.info ~doc:"The / segmented path for the value to be stored at"
+       ~docv:"PATH" [ "path" ]
+
 let port =
   Arg.value @@ Arg.opt Arg.int 8080
   @@ Arg.info ~doc:"The port to run the server on" ~docv:"PORT" [ "port" ]
@@ -133,9 +163,46 @@ let serve _fs =
   Cmd.v info
   @@ Term.(const serve $ logs $ remote $ directory $ const "::" $ port)
 
+let add_project stdin =
+  let add () dir path =
+    let repo = Store.repository (config dir) in
+    let main = Store.of_branch repo in
+    let buf = Buffer.create 1028 in
+    let () = Eio.Flow.(copy stdin (buffer_sink buf)) in
+    let segs = String.split_on_char '/' path in
+    match Store.add_project_json main segs (Buffer.contents buf) with
+    | Ok () -> ()
+    | Error _ -> Fmt.epr "Failed to store!"
+  in
+  let doc = "Add a project using JSON read from stdin" in
+  let info = Cmd.info "add" ~doc in
+  Cmd.v info @@ Term.(const add $ logs $ directory $ path)
+
+let dummy_details =
+  Retirement_data.Types.
+    {
+      flight_trip_type = `None;
+      outbound_details = None;
+      inbound_details = None;
+      train_details = [];
+      taxi_details = [];
+      additional_details = [];
+      primary_reason = `Conference;
+      secondary_reason = None;
+      reason_text = "Some reason for travelling!";
+    }
+
+let dummy stdout =
+  let dummy () =
+    Eio.Flow.(copy_string (Data.to_json_string (Data.v dummy_details)) stdout)
+  in
+  let doc = "Write a dummy retirement JSON blob to stdout" in
+  let info = Cmd.info "dummy" ~doc in
+  Cmd.v info @@ Term.(const dummy $ logs)
+
 let cmds env =
   let fs = Eio.Stdenv.fs env in
-  [ serve fs ]
+  [ serve fs; add_project env#stdin; dummy env#stdout ]
 
 let version =
   match Build_info.V1.version () with
