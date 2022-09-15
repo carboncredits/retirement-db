@@ -2,13 +2,19 @@ open Retirement
 
 let await = Lwt_eio.Promise.await_lwt
 
-module Schema =
-  Irmin_git.Schema.Make (Git_unix.Store) (Data)
+(* Replace insecure SHA1 with SHA256 -- requires a little work
+     in order to have nice local checkouts.  *)
+module Git_store = Git_unix.Make (Digestif.SHA256)
+
+module Schema = struct
+  include Irmin_git.Schema.Make (Git_store) (Data)
     (Irmin_git.Branch.Make (Irmin.Branch.String))
+end
 
 module I = struct
   module Schema = Schema
-  include Irmin_git_unix.FS.Make (Schema)
+  module Maker = Irmin_git_unix.Maker (Git_store) 
+  include Maker.Make (Schema)
 end
 
 module Store = Store.Make (I)
