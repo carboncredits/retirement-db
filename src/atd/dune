@@ -8,7 +8,7 @@
  (targets retirement_data_j.ml retirement_data_j.mli)
  (deps retirement_data.atd)
  (action
-  (run atdgen -j %{deps} -open Gql)))
+  (run atdgen -j -j-std %{deps} -open Gql)))
 
 (library
  (name retirement_data)
