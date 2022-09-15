@@ -7,6 +7,9 @@ val of_string : string -> (t, [ `Msg of string ]) result
 val to_json_string : t -> string
 (** Serialises the data to a JSON string *)
 
+val to_pretty_string : t -> string
+(** Like {! to_json_string} but prettier! *)
+
 val pp : t Fmt.t
 (** A pretty printer for retirement data *)
 
