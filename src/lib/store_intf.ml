@@ -35,6 +35,9 @@ module type S = sig
   (** [get_project store path] gets the project at [path] in [store]. This will raise
       [Not_found] if there is no value at [path]. *)
 
+  val get_all : I.t -> I.path -> Data.t list
+  (** [get_all store path] finds all of the stored data items at [path]. *)
+
   val find_project : I.t -> I.path -> Data.t option
   (** Like {! get_project} only will wrap [Not_found] into an option. *)
 end

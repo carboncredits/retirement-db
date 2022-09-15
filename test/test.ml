@@ -31,7 +31,13 @@ let dummy_details =
 let projects =
   [ ([ "a" ], Data.v dummy_details); ([ "b" ], Data.v dummy_details) ]
 
-let add_projects store =
+let same_path_projects =
+  [
+    ([ "2022"; "1"; "a" ], Data.v dummy_details);
+    ([ "2022"; "1"; "b" ], Data.v dummy_details);
+  ]
+
+let add_projects store projects =
   List.iter
     (fun (path, proj) -> Store.add_project store path proj |> Result.get_ok)
     projects
@@ -40,7 +46,7 @@ let with_store ?(empty = true) fn =
   let config = Irmin_mem.config () in
   let repo = Store.repository config in
   let main = Store.of_branch repo in
-  if empty then fn main else add_projects main;
+  if empty then fn main else add_projects main projects;
   fn main
 
 let project = Alcotest.of_pp Data.pp
@@ -66,6 +72,13 @@ let test_read () =
   let proj = Store.get_project main path_1 in
   Alcotest.check project "same project" proj_1 proj
 
+let test_get_all () =
+  with_store ~empty:true @@ fun main ->
+  add_projects main same_path_projects;
+  let real = List.map snd same_path_projects in
+  let projs = Store.get_all main [ "2022"; "1" ] in
+  Alcotest.(check (list project)) "same projects" real projs
+
 let () =
   let test_case s fn = Alcotest.test_case s `Quick fn in
   Eio_main.run @@ fun env ->
@@ -76,6 +89,7 @@ let () =
   Lwt_eio.with_event_loop ~clock:env#clock @@ fun _id ->
   Alcotest.run "project database"
     [
-      ("basics", [ test_case "read" test_read ]);
+      ( "basics",
+        [ test_case "read" test_read; test_case "get-all" test_get_all ] );
       ("low-level", [ test_case "backwards-compat" (test_backwards_compat dir) ]);
     ]

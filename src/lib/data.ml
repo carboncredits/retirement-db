@@ -14,6 +14,7 @@ let raw_version s =
 let pp ppf t = Fmt.pf ppf "%s" (string_of_t t)
 let equal a b = String.equal (string_of_t a) (string_of_t b)
 let of_string v = try Ok (t_of_string v) with Failure s -> Error (`Msg s)
+let to_json_string d = string_of_t d
 let t = Irmin.Type.like ~pp ~equal ~of_string Retirement_data.Types.t
 let v ?(version = Retirement_data.latest_version) details = { version; details }
 let details t = t.details
