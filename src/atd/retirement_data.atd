@@ -21,21 +21,19 @@ type flight_type <ocaml attr="deriving irmin,graphql"> = [
 ]
 
 type airport <ocaml attr="deriving irmin,graphql"> = {
-    code : string;
-    lat : float;
-    lng : float;
-    name : string;
-    city : string;
+    id: string;
+    name: string;
+    iata_code <json name="iataCode"> : string;
 }
 
 type flight_details <ocaml attr="deriving irmin,graphql"> = {
-    origin : airport;
-    destination : airport;
-    via : airport list;
-    flight_class <json name="flightClass"> : flight_class;
-    flight_type <json name="flightType"> : flight_type;
+    departure : airport;
+    arrival : airport;
+    passenger_count <json name="passengerCount"> : int;
+    flight_count <json name="flightCount"> : int;
+    ?travel_class <json name="travelClass"> : string option;
+    ?charter : string option;
     aircraft_type <json name="aircraftType"> : string;
-    number_of_people <json name="numberOfPeople"> : int;
 }
 
 type train_class <ocaml attr="deriving irmin,graphql"> = [ 
@@ -94,9 +92,7 @@ type reason <ocaml attr="deriving irmin,graphql"> = [
 ]
 
 type travel_details <ocaml attr="deriving irmin,graphql"> = {
-    flight_trip_type <json name="flightTripType"> : flight_trip;
-    ?outbound_details <json name="outboundDetails"> : flight_details option;
-    ?inbound_details <json name="inboundDetails"> : flight_details option;
+    flight_details <json name="flightDetails"> : flight_details list;
     train_details <json name="trainDetails"> : train_details list;
     taxi_details <json name="taxiDetails"> : taxi_details list;
     additional_details <json name="additionalDetails"> : additional_details list;
