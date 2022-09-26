@@ -181,9 +181,7 @@ let add_project stdin =
 let dummy_details =
   Retirement_data.Types.
     {
-      flight_trip_type = `None;
-      outbound_details = None;
-      inbound_details = None;
+      flight_details = [];
       train_details = [];
       taxi_details = [];
       additional_details = [];

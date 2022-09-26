@@ -29,7 +29,7 @@ mutation {
     info: {parents: [], allow_empty: false, retries: 1, message: "Hello", author: "Me"}, value: {
       version: { major: 0, minor: 1 }, 
       details: {
-        flightTripType: "None",
+        flightDetails: [],
         trainDetails: [],
         taxiDetails: [],
         additionalDetails: [],
@@ -49,7 +49,7 @@ Or using the `irmin` cli tool, for example:
 
 ```bash
 $ irmin get hello/world --root=./var
-{ "version": "v0", "details": ... }
+{ "version": { "major": 0, "minor": 1 }, "details": ... }
 ```
 
 The default store is on the file-system using a git-compatible format and JSON serialisation, so it is entirely possible to `cd` into the directory and checkout the `main` branch and interact with the files directly and `git commit` changes.

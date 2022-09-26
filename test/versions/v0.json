@@ -1,14 +1,11 @@
 {
-    "version": { "major": 0, "minor": 1 }, 
+    "version": { "major": 0, "minor": 1 },
     "details": {
-        "flightTripType": "none",
-        // "outbound_details" = None;
-        // "inbound_details" = None;
-        "trainDetails": [],
-        "taxiDetails": [],
-        "additionalDetails": [],
-        "primaryReason": "Conference",
-        // "secondary_reason" = None;
-        "reasonText": "Some reason for travelling!"
+      "flightDetails": [],
+      "trainDetails": [],
+      "taxiDetails": [],
+      "additionalDetails": [],
+      "primaryReason": "Conference",
+      "reasonText": "Some reason for travelling!"
     }
-}
+  }

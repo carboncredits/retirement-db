@@ -30,21 +30,19 @@ export type FlightType =
 | { kind: 'Chartered' /* JSON: "chartered" */ }
 
 export type Airport = {
-  code: string;
-  lat: number;
-  lng: number;
+  id: string;
   name: string;
-  city: string;
+  iata_code: string;
 }
 
 export type FlightDetails = {
-  origin: Airport;
-  destination: Airport;
-  via: Airport[];
-  flight_class: FlightClass;
-  flight_type: FlightType;
+  departure: Airport;
+  arrival: Airport;
+  passenger_count: Int;
+  flight_count: Int;
+  travel_class?: string;
+  charter?: string;
   aircraft_type: string;
-  number_of_people: Int;
 }
 
 export type TrainClass =
@@ -99,9 +97,7 @@ export type Reason =
 | { kind: 'Other' }
 
 export type TravelDetails = {
-  flight_trip_type: FlightTrip;
-  outbound_details?: FlightDetails;
-  inbound_details?: FlightDetails;
+  flight_details: FlightDetails[];
   train_details: TrainDetails[];
   taxi_details: TaxiDetails[];
   additional_details: AdditionalDetails[];
@@ -208,45 +204,41 @@ export function readFlightType(x: any, context: any = x): FlightType {
 
 export function writeAirport(x: Airport, context: any = x): any {
   return {
-    'code': _atd_write_required_field('Airport', 'code', _atd_write_string, x.code, x),
-    'lat': _atd_write_required_field('Airport', 'lat', _atd_write_float, x.lat, x),
-    'lng': _atd_write_required_field('Airport', 'lng', _atd_write_float, x.lng, x),
+    'id': _atd_write_required_field('Airport', 'id', _atd_write_string, x.id, x),
     'name': _atd_write_required_field('Airport', 'name', _atd_write_string, x.name, x),
-    'city': _atd_write_required_field('Airport', 'city', _atd_write_string, x.city, x),
+    'iataCode': _atd_write_required_field('Airport', 'iata_code', _atd_write_string, x.iata_code, x),
   };
 }
 
 export function readAirport(x: any, context: any = x): Airport {
   return {
-    code: _atd_read_required_field('Airport', 'code', _atd_read_string, x['code'], x),
-    lat: _atd_read_required_field('Airport', 'lat', _atd_read_float, x['lat'], x),
-    lng: _atd_read_required_field('Airport', 'lng', _atd_read_float, x['lng'], x),
+    id: _atd_read_required_field('Airport', 'id', _atd_read_string, x['id'], x),
     name: _atd_read_required_field('Airport', 'name', _atd_read_string, x['name'], x),
-    city: _atd_read_required_field('Airport', 'city', _atd_read_string, x['city'], x),
+    iata_code: _atd_read_required_field('Airport', 'iataCode', _atd_read_string, x['iataCode'], x),
   };
 }
 
 export function writeFlightDetails(x: FlightDetails, context: any = x): any {
   return {
-    'origin': _atd_write_required_field('FlightDetails', 'origin', writeAirport, x.origin, x),
-    'destination': _atd_write_required_field('FlightDetails', 'destination', writeAirport, x.destination, x),
-    'via': _atd_write_required_field('FlightDetails', 'via', _atd_write_array(writeAirport), x.via, x),
-    'flightClass': _atd_write_required_field('FlightDetails', 'flight_class', writeFlightClass, x.flight_class, x),
-    'flightType': _atd_write_required_field('FlightDetails', 'flight_type', writeFlightType, x.flight_type, x),
+    'departure': _atd_write_required_field('FlightDetails', 'departure', writeAirport, x.departure, x),
+    'arrival': _atd_write_required_field('FlightDetails', 'arrival', writeAirport, x.arrival, x),
+    'passengerCount': _atd_write_required_field('FlightDetails', 'passenger_count', _atd_write_int, x.passenger_count, x),
+    'flightCount': _atd_write_required_field('FlightDetails', 'flight_count', _atd_write_int, x.flight_count, x),
+    'travelClass': _atd_write_optional_field(_atd_write_string, x.travel_class, x),
+    'charter': _atd_write_optional_field(_atd_write_string, x.charter, x),
     'aircraftType': _atd_write_required_field('FlightDetails', 'aircraft_type', _atd_write_string, x.aircraft_type, x),
-    'numberOfPeople': _atd_write_required_field('FlightDetails', 'number_of_people', _atd_write_int, x.number_of_people, x),
   };
 }
 
 export function readFlightDetails(x: any, context: any = x): FlightDetails {
   return {
-    origin: _atd_read_required_field('FlightDetails', 'origin', readAirport, x['origin'], x),
-    destination: _atd_read_required_field('FlightDetails', 'destination', readAirport, x['destination'], x),
-    via: _atd_read_required_field('FlightDetails', 'via', _atd_read_array(readAirport), x['via'], x),
-    flight_class: _atd_read_required_field('FlightDetails', 'flightClass', readFlightClass, x['flightClass'], x),
-    flight_type: _atd_read_required_field('FlightDetails', 'flightType', readFlightType, x['flightType'], x),
+    departure: _atd_read_required_field('FlightDetails', 'departure', readAirport, x['departure'], x),
+    arrival: _atd_read_required_field('FlightDetails', 'arrival', readAirport, x['arrival'], x),
+    passenger_count: _atd_read_required_field('FlightDetails', 'passengerCount', _atd_read_int, x['passengerCount'], x),
+    flight_count: _atd_read_required_field('FlightDetails', 'flightCount', _atd_read_int, x['flightCount'], x),
+    travel_class: _atd_read_optional_field(_atd_read_string, x['travelClass'], x),
+    charter: _atd_read_optional_field(_atd_read_string, x['charter'], x),
     aircraft_type: _atd_read_required_field('FlightDetails', 'aircraftType', _atd_read_string, x['aircraftType'], x),
-    number_of_people: _atd_read_required_field('FlightDetails', 'numberOfPeople', _atd_read_int, x['numberOfPeople'], x),
   };
 }
 
@@ -446,9 +438,7 @@ export function readReason(x: any, context: any = x): Reason {
 
 export function writeTravelDetails(x: TravelDetails, context: any = x): any {
   return {
-    'flightTripType': _atd_write_required_field('TravelDetails', 'flight_trip_type', writeFlightTrip, x.flight_trip_type, x),
-    'outboundDetails': _atd_write_optional_field(writeFlightDetails, x.outbound_details, x),
-    'inboundDetails': _atd_write_optional_field(writeFlightDetails, x.inbound_details, x),
+    'flightDetails': _atd_write_required_field('TravelDetails', 'flight_details', _atd_write_array(writeFlightDetails), x.flight_details, x),
     'trainDetails': _atd_write_required_field('TravelDetails', 'train_details', _atd_write_array(writeTrainDetails), x.train_details, x),
     'taxiDetails': _atd_write_required_field('TravelDetails', 'taxi_details', _atd_write_array(writeTaxiDetails), x.taxi_details, x),
     'additionalDetails': _atd_write_required_field('TravelDetails', 'additional_details', _atd_write_array(writeAdditionalDetails), x.additional_details, x),
@@ -460,9 +450,7 @@ export function writeTravelDetails(x: TravelDetails, context: any = x): any {
 
 export function readTravelDetails(x: any, context: any = x): TravelDetails {
   return {
-    flight_trip_type: _atd_read_required_field('TravelDetails', 'flightTripType', readFlightTrip, x['flightTripType'], x),
-    outbound_details: _atd_read_optional_field(readFlightDetails, x['outboundDetails'], x),
-    inbound_details: _atd_read_optional_field(readFlightDetails, x['inboundDetails'], x),
+    flight_details: _atd_read_required_field('TravelDetails', 'flightDetails', _atd_read_array(readFlightDetails), x['flightDetails'], x),
     train_details: _atd_read_required_field('TravelDetails', 'trainDetails', _atd_read_array(readTrainDetails), x['trainDetails'], x),
     taxi_details: _atd_read_required_field('TravelDetails', 'taxiDetails', _atd_read_array(readTaxiDetails), x['taxiDetails'], x),
     additional_details: _atd_read_required_field('TravelDetails', 'additionalDetails', _atd_read_array(readAdditionalDetails), x['additionalDetails'], x),
