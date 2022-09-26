@@ -1,3 +1,11 @@
 (executable
  (name test_client)
- (libraries alcotest retirement retirement-data cohttp-lwt-unix))
+ (libraries alcotest eio_main retirement retirement-data cohttp-lwt-unix))
+
+(rule
+ (alias runtest)
+ (deps
+  ./test_client.exe
+  (package retirement))
+ (action
+  (run ./test_client.exe)))
