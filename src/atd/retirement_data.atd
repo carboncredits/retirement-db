@@ -75,7 +75,7 @@ type taxi_details <ocaml attr="deriving irmin,graphql"> = {
 type additional_details <ocaml attr="deriving irmin,graphql"> = {
     journey_time <json name="journeyTime"> : journey_time;
     number_of_people <json name="numberOfPeople"> : int;
-    type' <json name="type"> : string;
+    type_ <json name="type"> : string;
 }
 
 type reason <ocaml attr="deriving irmin,graphql"> = [

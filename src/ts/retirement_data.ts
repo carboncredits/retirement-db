@@ -81,7 +81,7 @@ export type TaxiDetails = {
 export type AdditionalDetails = {
   journey_time: JourneyTime;
   number_of_people: Int;
-  type': string;
+  type_: string;
 }
 
 export type Reason =
@@ -371,7 +371,7 @@ export function writeAdditionalDetails(x: AdditionalDetails, context: any = x): 
   return {
     'journeyTime': _atd_write_required_field('AdditionalDetails', 'journey_time', writeJourneyTime, x.journey_time, x),
     'numberOfPeople': _atd_write_required_field('AdditionalDetails', 'number_of_people', _atd_write_int, x.number_of_people, x),
-    'type': _atd_write_required_field('AdditionalDetails', 'type\'', _atd_write_string, x.type', x),
+    'type': _atd_write_required_field('AdditionalDetails', 'type_', _atd_write_string, x.type_, x),
   };
 }
 
@@ -379,7 +379,7 @@ export function readAdditionalDetails(x: any, context: any = x): AdditionalDetai
   return {
     journey_time: _atd_read_required_field('AdditionalDetails', 'journeyTime', readJourneyTime, x['journeyTime'], x),
     number_of_people: _atd_read_required_field('AdditionalDetails', 'numberOfPeople', _atd_read_int, x['numberOfPeople'], x),
-    type': _atd_read_required_field('AdditionalDetails', 'type', _atd_read_string, x['type'], x),
+    type_: _atd_read_required_field('AdditionalDetails', 'type', _atd_read_string, x['type'], x),
   };
 }
 
