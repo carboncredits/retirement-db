@@ -101,7 +101,33 @@ type travel_details <ocaml attr="deriving irmin,graphql"> = {
     reason_text <json name="reasonText"> : string;
 }
 
+type grant_details <ocaml attr="deriving irmin,graphql"> = {
+  sponsor_and_pi_confirmation <json name="sponsorAndPIConfirmation">: bool;
+  award: string;
+  project: string;
+  task: string;
+}
+
+type cost_centre_details <ocaml attr="deriving irmin,graphql"> = {
+  budget_holder_confirmation <json name="budgetHolderConfirmation">: bool;
+  department: string;
+  cost_centre <json name="costCentre">: string;
+  source: string;
+}
+
+type finance_kind <ocaml attr="deriving irmin,graphql"> = [ Grant | CostCentre ]
+
+type cambridge_id <ocaml attr="deriving irmin,graphql"> = {
+  crsid: string;
+  name: string;
+  department: string;
+}
+
 type t <ocaml attr="deriving irmin,graphql"> = {
     version : version;
     details : travel_details;
-}
+    id : cambridge_id;
+    finance_kind <json name="financeKind">: finance_kind;
+    ?cost_centre_details <json name="costCentreDetails">: cost_centre_details option;
+    ?grant_details <json name="grantDetails">: grant_details option;
+} <ocaml valid="fun x -> match x.finance_kind with `Grant -> Option.is_some x.grant_details | `CostCentre -> Option.is_some x.cost_centre_details">

@@ -106,9 +106,37 @@ export type TravelDetails = {
   reason_text: string;
 }
 
+export type GrantDetails = {
+  sponsor_and_pi_confirmation: boolean;
+  award: string;
+  project: string;
+  task: string;
+}
+
+export type CostCentreDetails = {
+  budget_holder_confirmation: boolean;
+  department: string;
+  cost_centre: string;
+  source: string;
+}
+
+export type FinanceKind =
+| { kind: 'Grant' }
+| { kind: 'CostCentre' }
+
+export type CambridgeId = {
+  crsid: string;
+  name: string;
+  department: string;
+}
+
 export type T = {
   version: Version;
   details: TravelDetails;
+  id: CambridgeId;
+  finance_kind: FinanceKind;
+  cost_centre_details?: CostCentreDetails;
+  grant_details?: GrantDetails;
 }
 
 export function writeVersion(x: Version, context: any = x): any {
@@ -460,10 +488,87 @@ export function readTravelDetails(x: any, context: any = x): TravelDetails {
   };
 }
 
+export function writeGrantDetails(x: GrantDetails, context: any = x): any {
+  return {
+    'sponsorAndPIConfirmation': _atd_write_required_field('GrantDetails', 'sponsor_and_pi_confirmation', _atd_write_bool, x.sponsor_and_pi_confirmation, x),
+    'award': _atd_write_required_field('GrantDetails', 'award', _atd_write_string, x.award, x),
+    'project': _atd_write_required_field('GrantDetails', 'project', _atd_write_string, x.project, x),
+    'task': _atd_write_required_field('GrantDetails', 'task', _atd_write_string, x.task, x),
+  };
+}
+
+export function readGrantDetails(x: any, context: any = x): GrantDetails {
+  return {
+    sponsor_and_pi_confirmation: _atd_read_required_field('GrantDetails', 'sponsorAndPIConfirmation', _atd_read_bool, x['sponsorAndPIConfirmation'], x),
+    award: _atd_read_required_field('GrantDetails', 'award', _atd_read_string, x['award'], x),
+    project: _atd_read_required_field('GrantDetails', 'project', _atd_read_string, x['project'], x),
+    task: _atd_read_required_field('GrantDetails', 'task', _atd_read_string, x['task'], x),
+  };
+}
+
+export function writeCostCentreDetails(x: CostCentreDetails, context: any = x): any {
+  return {
+    'budgetHolderConfirmation': _atd_write_required_field('CostCentreDetails', 'budget_holder_confirmation', _atd_write_bool, x.budget_holder_confirmation, x),
+    'department': _atd_write_required_field('CostCentreDetails', 'department', _atd_write_string, x.department, x),
+    'costCentre': _atd_write_required_field('CostCentreDetails', 'cost_centre', _atd_write_string, x.cost_centre, x),
+    'source': _atd_write_required_field('CostCentreDetails', 'source', _atd_write_string, x.source, x),
+  };
+}
+
+export function readCostCentreDetails(x: any, context: any = x): CostCentreDetails {
+  return {
+    budget_holder_confirmation: _atd_read_required_field('CostCentreDetails', 'budgetHolderConfirmation', _atd_read_bool, x['budgetHolderConfirmation'], x),
+    department: _atd_read_required_field('CostCentreDetails', 'department', _atd_read_string, x['department'], x),
+    cost_centre: _atd_read_required_field('CostCentreDetails', 'costCentre', _atd_read_string, x['costCentre'], x),
+    source: _atd_read_required_field('CostCentreDetails', 'source', _atd_read_string, x['source'], x),
+  };
+}
+
+export function writeFinanceKind(x: FinanceKind, context: any = x): any {
+  switch (x.kind) {
+    case 'Grant':
+      return 'Grant'
+    case 'CostCentre':
+      return 'CostCentre'
+  }
+}
+
+export function readFinanceKind(x: any, context: any = x): FinanceKind {
+  switch (x) {
+    case 'Grant':
+      return { kind: 'Grant' }
+    case 'CostCentre':
+      return { kind: 'CostCentre' }
+    default:
+      _atd_bad_json('FinanceKind', x, context)
+      throw new Error('impossible')
+  }
+}
+
+export function writeCambridgeId(x: CambridgeId, context: any = x): any {
+  return {
+    'crsid': _atd_write_required_field('CambridgeId', 'crsid', _atd_write_string, x.crsid, x),
+    'name': _atd_write_required_field('CambridgeId', 'name', _atd_write_string, x.name, x),
+    'department': _atd_write_required_field('CambridgeId', 'department', _atd_write_string, x.department, x),
+  };
+}
+
+export function readCambridgeId(x: any, context: any = x): CambridgeId {
+  return {
+    crsid: _atd_read_required_field('CambridgeId', 'crsid', _atd_read_string, x['crsid'], x),
+    name: _atd_read_required_field('CambridgeId', 'name', _atd_read_string, x['name'], x),
+    department: _atd_read_required_field('CambridgeId', 'department', _atd_read_string, x['department'], x),
+  };
+}
+
 export function writeT(x: T, context: any = x): any {
   return {
     'version': _atd_write_required_field('T', 'version', writeVersion, x.version, x),
     'details': _atd_write_required_field('T', 'details', writeTravelDetails, x.details, x),
+    'id': _atd_write_required_field('T', 'id', writeCambridgeId, x.id, x),
+    'financeKind': _atd_write_required_field('T', 'finance_kind', writeFinanceKind, x.finance_kind, x),
+    'costCentreDetails': _atd_write_optional_field(writeCostCentreDetails, x.cost_centre_details, x),
+    'grantDetails': _atd_write_optional_field(writeGrantDetails, x.grant_details, x),
   };
 }
 
@@ -471,6 +576,10 @@ export function readT(x: any, context: any = x): T {
   return {
     version: _atd_read_required_field('T', 'version', readVersion, x['version'], x),
     details: _atd_read_required_field('T', 'details', readTravelDetails, x['details'], x),
+    id: _atd_read_required_field('T', 'id', readCambridgeId, x['id'], x),
+    finance_kind: _atd_read_required_field('T', 'financeKind', readFinanceKind, x['financeKind'], x),
+    cost_centre_details: _atd_read_optional_field(readCostCentreDetails, x['costCentreDetails'], x),
+    grant_details: _atd_read_optional_field(readGrantDetails, x['grantDetails'], x),
   };
 }
 

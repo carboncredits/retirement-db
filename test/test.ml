@@ -14,25 +14,12 @@ end
 
 module Store = Store.Make (Irmin_store)
 
-let dummy_details =
-  Retirement_data.Types.
-    {
-      flight_details = [];
-      train_details = [];
-      taxi_details = [];
-      additional_details = [];
-      primary_reason = `Conference;
-      secondary_reason = None;
-      reason_text = "Some reason for travelling!";
-    }
-
-let projects =
-  [ ([ "a" ], Data.v dummy_details); ([ "b" ], Data.v dummy_details) ]
+let projects = [ ([ "a" ], Data.dummy_details); ([ "b" ], Data.dummy_details) ]
 
 let same_path_projects =
   [
-    ([ "2022"; "1"; "a" ], Data.v dummy_details);
-    ([ "2022"; "1"; "b" ], Data.v dummy_details);
+    ([ "2022"; "1"; "a" ], Data.dummy_details);
+    ([ "2022"; "1"; "b" ], Data.dummy_details);
   ]
 
 let add_projects store projects =
@@ -53,10 +40,11 @@ let project = Alcotest.of_pp Data.pp
    to read the various versions of the project metadata format. Any time
    we bump a version we should add it to test/versions and ensure it can
    be read here. *)
-let test_backwards_compat dir () =
+let test_backwards_compat dir =
   let files = Eio.Path.read_dir dir in
-  List.iter
+  List.map
     (fun file ->
+      Alcotest.test_case file `Quick @@ fun () ->
       let s = Eio.Path.(load (dir / file)) in
       let project = Data.of_string s in
       match project with
@@ -89,5 +77,5 @@ let () =
     [
       ( "basics",
         [ test_case "read" test_read; test_case "get-all" test_get_all ] );
-      ("low-level", [ test_case "backwards-compat" (test_backwards_compat dir) ]);
+      ("low-level", test_backwards_compat dir);
     ]
