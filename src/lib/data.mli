@@ -23,12 +23,21 @@ val raw_version : string -> Retirement_data.Types.version option
 (** [raw_version json] will try to extract the version information from a raw
     piece of JSON. *)
 
+type finance_details =
+  [ `Grant of Retirement_data.Types.grant_details
+  | `CostCentre of Retirement_data.Types.cost_centre_details ]
+
 val v :
   ?version:Retirement_data.Types.version ->
+  Retirement_data.Types.cambridge_id ->
+  finance_details ->
   Retirement_data.Types.travel_details ->
   t
 (** [v ?version details] constructs a new retirement data. If [version] is omitted, the 
     latest version will be used. *)
+
+val dummy_details : t
+(** Useful for tests and debugging. *)
 
 include Irmin.Contents.S with type t := t
 include Irmin_graphql.Server.CUSTOM_TYPE with type t := t

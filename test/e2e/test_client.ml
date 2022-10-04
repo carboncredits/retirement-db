@@ -55,6 +55,18 @@ let set_data ~reason =
           primaryReason: "Conference",
           reasonText: "%s"
       }
+      financeKind: "Grant"
+      id: {
+        crsid: "abc123",
+        department: "CST",
+        name: "Alice"
+      }
+      grantDetails: {
+        sponsorAndPiConfirmation: true,
+        award: "award",
+        project: "project",
+        task: "task"
+      }
   }, path: "hello/world", branch: "main") {
       hash
       info {

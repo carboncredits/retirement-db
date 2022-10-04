@@ -192,7 +192,7 @@ let dummy_details =
 
 let dummy stdout =
   let dummy () =
-    Eio.Flow.(copy_string (Data.to_pretty_string (Data.v dummy_details)) stdout)
+    Eio.Flow.(copy_string (Data.to_pretty_string Data.dummy_details) stdout)
   in
   let doc = "Write a dummy retirement JSON blob to stdout" in
   let info = Cmd.info "dummy" ~doc in
