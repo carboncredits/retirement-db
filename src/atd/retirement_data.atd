@@ -131,3 +131,13 @@ type t <ocaml attr="deriving irmin,graphql"> = {
     ?cost_centre_details <json name="costCentreDetails">: cost_centre_details option;
     ?grant_details <json name="grantDetails">: grant_details option;
 } <ocaml valid="fun x -> match x.finance_kind with `Grant -> Option.is_some x.grant_details | `CostCentre -> Option.is_some x.cost_centre_details">
+
+(* Data that we store on-chain -- should preserve privacy whilst
+   allowing for some level of public accountability *)
+type on_chain = {
+  version : version; (** Version of the on-chain data. *)
+  total_distance <json name="totalDistance">: float; (** Total distance for all flights in retirement. *)
+  total_co2e <json name="totalCo2e">: float; (** Total co2e of all flights stored in kilograms. *)
+  number_of_flights <json name="numberOfFlights">: int; (** Number of flights in this transaction. *)
+  hash : string; (** The unique hash of the corresponding private data. *)
+}

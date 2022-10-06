@@ -1,4 +1,8 @@
-import { TrainClass, JourneyTime, TaxiType, Reason, FlightClass } from "./retirement_data"
+import { TrainClass, JourneyTime, TaxiType, Reason, FlightClass, Version } from "./retirement_data"
+
+// The current version for the on-chain data, this needs bumped
+// accordingly when the ATD definition changes
+export const on_chain_version : Version = { major: 0, minor: 1 }
 
 export const allFlightClasses: FlightClass[] = [
   { kind: 'First' /* JSON: "first" */ },
