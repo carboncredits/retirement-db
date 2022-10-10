@@ -13,11 +13,10 @@ build: [
 depends: [
   "dune"               {>= "2.9.0"}
   "retirement-data"    {= version}
-  "irmin"              {>= "3.3.0"}
-  "irmin-git"          {>= "3.3.0"}
-  "irmin-graphql"      {>= "3.3.0"}
+  "irmin"              {>= "3.4.2"}
+  "irmin-git"          {>= "3.4.2"}
+  "irmin-graphql"      {>= "3.4.2"}
   "eio_main"           {>= "0.5"}
-  "bisect_ppx"         {= "dev"}
   "logs"
   "dune-build-info"
   "ppx_deriving_yojson"
@@ -26,9 +25,3 @@ depends: [
   "alcotest"           {with-test}
 ]
 synopsis: "Project metadata server"
-pin-depends: [
-    [ "irmin.3.3.1" "git+https://github.com/patricoferris/irmin#9c18cb559f870c8a4fa38ac01b5fd457c928792d" ]
-    [ "irmin-git.3.3.1" "git+https://github.com/patricoferris/irmin#9c18cb559f870c8a4fa38ac01b5fd457c928792d" ]
-    [ "irmin-graphql.3.3.1" "git+https://github.com/patricoferris/irmin#9c18cb559f870c8a4fa38ac01b5fd457c928792d" ]
-    [ "bisect_ppx.dev" "git+https://github.com/patricoferris/bisect_ppx#1901191edf2ebd6a9161e4bf828a0d24c2124f3f"]
-]

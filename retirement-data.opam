@@ -14,11 +14,10 @@ depends: [
   "dune"                 {>= "2.9.0"}
   "atdgen"               {>= "2.10.0"} # For the OCaml bindings generation
   "atdts"                {>= "2.10.0"} # For the typescript bindings generation
-  "ppx_irmin"            {>= "3.3.1"}
+  "ppx_irmin"            {>= "3.4.2"}
   "ppx_deriving_graphql" {= "dev"}
 ]
 synopsis: "Project metadata JSON codec and types"
 pin-depends:[
-  ["ppx_irmin.3.3.1" "git+https://github.com/patricoferris/irmin#9c18cb559f870c8a4fa38ac01b5fd457c928792d"]
   ["ppx_deriving_graphql.dev" "git+https://github.com/patricoferris/ppx_deriving_graphql#aec4c67442f63a54dc6d0da118c3a729042f8820"]
 ]
