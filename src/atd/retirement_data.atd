@@ -123,11 +123,20 @@ type cambridge_id <ocaml attr="deriving irmin,graphql"> = {
   department: string;
 }
 
+type offset <ocaml attr="deriving irmin,graphql"> = {
+    token_id <json name="tokenId">: int;
+    project_name <json name="projectName">: string;
+    minter : string;
+    kyc : string;
+    amount : int;
+}
+
 type t <ocaml attr="deriving irmin,graphql"> = {
     version : version;
     details : travel_details;
     id : cambridge_id;
     finance_kind <json name="financeKind">: finance_kind;
+    offset : offset;
     ?cost_centre_details <json name="costCentreDetails">: cost_centre_details option;
     ?grant_details <json name="grantDetails">: grant_details option;
 } <ocaml valid="fun x -> match x.finance_kind with `Grant -> Option.is_some x.grant_details | `CostCentre -> Option.is_some x.cost_centre_details">

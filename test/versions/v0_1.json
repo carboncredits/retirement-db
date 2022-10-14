@@ -10,6 +10,13 @@
   },
   "id": { "crsid": "abc123", "name": "Alice", "department": "CST" },
   "financeKind": "Grant",
+  "offset": {
+    "tokenId": 1234,
+    "projectName": "Gola",
+    "minter": "abcd1234wxyz5678",
+    "kyc": "1234abcd5678wxyz",
+    "amount": 556789
+  },
   "grantDetails": {
     "sponsorAndPIConfirmation": true,
     "award": "award",
