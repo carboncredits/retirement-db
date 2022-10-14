@@ -30,6 +30,7 @@ let raw_version s =
 let pp ppf t = Fmt.pf ppf "%s" (J.string_of_t t)
 let of_string v = try Ok (J.t_of_string v) with Failure s -> Error (`Msg s)
 let to_json_string d = J.string_of_t d
+let list_to_json_string ds = J.string_of_t_list ds
 let to_pretty_string d = to_json_string d |> Yojson.Safe.prettify
 
 type finance_details =

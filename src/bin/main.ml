@@ -74,22 +74,12 @@ let callback main schema _conn req body =
       in
       `Response r
   | `GET, [ "json"; year; month ] ->
-      let buffer = Buffer.create 1028 in
-      Buffer.add_string buffer "[";
       let items =
-        Store.get_all main [ year; month ] |> List.map Data.to_json_string
+        Store.get_all main [ year; month ] |> Data.list_to_json_string
       in
-      let () =
-        List.iter
-          (fun v ->
-            Buffer.add_string buffer v;
-            Buffer.add_string buffer ",")
-          items
-      in
-      Buffer.add_string buffer "]";
       let+ r =
         Cohttp_lwt_unix.Server.respond_string ~headers:json_headers ~status:`OK
-          ~body:(Buffer.contents buffer) ()
+          ~body:items ()
       in
       `Response r
   | _meth, s ->
