@@ -130,11 +130,20 @@ export type CambridgeId = {
   department: string;
 }
 
+export type Offset = {
+  token_id: Int;
+  project_name: string;
+  minter: string;
+  kyc: string;
+  amount: Int;
+}
+
 export type T = {
   version: Version;
   details: TravelDetails;
   id: CambridgeId;
   finance_kind: FinanceKind;
+  offset: Offset;
   cost_centre_details?: CostCentreDetails;
   grant_details?: GrantDetails;
 }
@@ -571,12 +580,33 @@ export function readCambridgeId(x: any, context: any = x): CambridgeId {
   };
 }
 
+export function writeOffset(x: Offset, context: any = x): any {
+  return {
+    'tokenId': _atd_write_required_field('Offset', 'token_id', _atd_write_int, x.token_id, x),
+    'projectName': _atd_write_required_field('Offset', 'project_name', _atd_write_string, x.project_name, x),
+    'minter': _atd_write_required_field('Offset', 'minter', _atd_write_string, x.minter, x),
+    'kyc': _atd_write_required_field('Offset', 'kyc', _atd_write_string, x.kyc, x),
+    'amount': _atd_write_required_field('Offset', 'amount', _atd_write_int, x.amount, x),
+  };
+}
+
+export function readOffset(x: any, context: any = x): Offset {
+  return {
+    token_id: _atd_read_required_field('Offset', 'tokenId', _atd_read_int, x['tokenId'], x),
+    project_name: _atd_read_required_field('Offset', 'projectName', _atd_read_string, x['projectName'], x),
+    minter: _atd_read_required_field('Offset', 'minter', _atd_read_string, x['minter'], x),
+    kyc: _atd_read_required_field('Offset', 'kyc', _atd_read_string, x['kyc'], x),
+    amount: _atd_read_required_field('Offset', 'amount', _atd_read_int, x['amount'], x),
+  };
+}
+
 export function writeT(x: T, context: any = x): any {
   return {
     'version': _atd_write_required_field('T', 'version', writeVersion, x.version, x),
     'details': _atd_write_required_field('T', 'details', writeTravelDetails, x.details, x),
     'id': _atd_write_required_field('T', 'id', writeCambridgeId, x.id, x),
     'financeKind': _atd_write_required_field('T', 'finance_kind', writeFinanceKind, x.finance_kind, x),
+    'offset': _atd_write_required_field('T', 'offset', writeOffset, x.offset, x),
     'costCentreDetails': _atd_write_optional_field(writeCostCentreDetails, x.cost_centre_details, x),
     'grantDetails': _atd_write_optional_field(writeGrantDetails, x.grant_details, x),
   };
@@ -588,6 +618,7 @@ export function readT(x: any, context: any = x): T {
     details: _atd_read_required_field('T', 'details', readTravelDetails, x['details'], x),
     id: _atd_read_required_field('T', 'id', readCambridgeId, x['id'], x),
     finance_kind: _atd_read_required_field('T', 'financeKind', readFinanceKind, x['financeKind'], x),
+    offset: _atd_read_required_field('T', 'offset', readOffset, x['offset'], x),
     cost_centre_details: _atd_read_optional_field(readCostCentreDetails, x['costCentreDetails'], x),
     grant_details: _atd_read_optional_field(readGrantDetails, x['grantDetails'], x),
   };

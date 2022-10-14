@@ -61,6 +61,13 @@ let set_data ~reason =
         department: "CST",
         name: "Alice"
       }
+      offset: {
+        tokenId: 1234,
+        projectName: "Gola",
+        minter: "abcd1234wxyz5678",
+        kyc: "1234abcd5678wxyz",
+        amount: 556789
+      },
       grantDetails: {
         sponsorAndPiConfirmation: true,
         award: "award",

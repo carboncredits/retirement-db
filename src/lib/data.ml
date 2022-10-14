@@ -37,13 +37,14 @@ type finance_details =
   [ `Grant of Retirement_data.Types.grant_details
   | `CostCentre of Retirement_data.Types.cost_centre_details ]
 
-let v ?(version = Retirement_data.latest_version) id finance details =
+let v ?(version = Retirement_data.latest_version) id finance details offset =
   match finance with
   | `Grant d ->
       {
         T.version;
         details;
         id;
+        offset;
         finance_kind = `Grant;
         grant_details = Some d;
         cost_centre_details = None;
@@ -53,6 +54,7 @@ let v ?(version = Retirement_data.latest_version) id finance details =
         T.version;
         details;
         id;
+        offset;
         finance_kind = `CostCentre;
         grant_details = None;
         cost_centre_details = Some d;
@@ -79,10 +81,20 @@ let dummy_grant_details =
       task = "task";
     }
 
+let dummy_offset =
+  Retirement_data.Types.
+    {
+      token_id = 1234;
+      project_name = "Gola";
+      minter = "abcd1234wxyz5678";
+      kyc = "1234abcd5678wxyz";
+      amount = 556789;
+    }
+
 let dummy_details =
   v
     { crsid = "abc123"; department = "CST"; name = "Alice" }
-    (`Grant dummy_grant_details) dummy_travel_details
+    (`Grant dummy_grant_details) dummy_travel_details dummy_offset
 
 let details t = t.T.details
 let merge' ~old:_ t1 _t2 = Lwt.return (Ok t1)

@@ -35,6 +35,7 @@ val v :
   Retirement_data.Types.cambridge_id ->
   finance_details ->
   Retirement_data.Types.travel_details ->
+  Retirement_data.Types.offset ->
   t
 (** [v ?version details] constructs a new retirement data. If [version] is omitted, the 
     latest version will be used. *)
