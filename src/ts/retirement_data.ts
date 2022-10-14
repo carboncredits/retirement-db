@@ -139,6 +139,8 @@ export type T = {
   grant_details?: GrantDetails;
 }
 
+export type TList = T[]
+
 export type OnChain = {
   version: Version;
   total_distance: number;
@@ -589,6 +591,14 @@ export function readT(x: any, context: any = x): T {
     cost_centre_details: _atd_read_optional_field(readCostCentreDetails, x['costCentreDetails'], x),
     grant_details: _atd_read_optional_field(readGrantDetails, x['grantDetails'], x),
   };
+}
+
+export function writeTList(x: TList, context: any = x): any {
+  return _atd_write_array(writeT)(x, context);
+}
+
+export function readTList(x: any, context: any = x): TList {
+  return _atd_read_array(readT)(x, context);
 }
 
 export function writeOnChain(x: OnChain, context: any = x): any {

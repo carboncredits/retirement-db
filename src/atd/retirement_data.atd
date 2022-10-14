@@ -132,6 +132,8 @@ type t <ocaml attr="deriving irmin,graphql"> = {
     ?grant_details <json name="grantDetails">: grant_details option;
 } <ocaml valid="fun x -> match x.finance_kind with `Grant -> Option.is_some x.grant_details | `CostCentre -> Option.is_some x.cost_centre_details">
 
+type t_list = t list
+
 (* Data that we store on-chain -- should preserve privacy whilst
    allowing for some level of public accountability *)
 type on_chain = {
