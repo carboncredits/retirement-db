@@ -42,39 +42,11 @@ let get_hash_from_commit_and_path ~commit ~path =
 |}
     commit path
 
-let set_data ~reason =
+let set_data =
   Fmt.str
     {|
   mutation {
-    test_set_and_get(info: {parents: [], allow_empty: false, retries: 1, message: "Hello", author: "Me"}, set: {version: { major: 0, minor: 1 }, 
-      details: {
-          flightDetails: [],
-          trainDetails: [],
-          taxiDetails: [],
-          additionalDetails: [],
-          primaryReason: "Conference",
-          reasonText: "%s"
-      }
-      financeKind: "Grant"
-      id: {
-        crsid: "abc123",
-        department: "CST",
-        name: "Alice"
-      }
-      offset: {
-        tokenId: 1234,
-        projectName: "Gola",
-        minter: "abcd1234wxyz5678",
-        kyc: "1234abcd5678wxyz",
-        amount: 556789
-      },
-      grantDetails: {
-        sponsorAndPiConfirmation: true,
-        award: "award",
-        project: "project",
-        task: "task"
-      }
-  }, path: "hello/world", branch: "main") {
+    test_set_and_get(info: {parents: [], allow_empty: false, retries: 1, message: "Hello", author: "Me"}, set: $value, path: "hello/world", branch: "main") {
       hash
       info {
         message
@@ -82,13 +54,15 @@ let set_data ~reason =
     }
   }
 |}
-    reason
 
 let headers = Cohttp.Header.of_list [ ("Content-Type", "application/json") ]
 let ( / ) t s = Yojson.Safe.Util.member s t
 
-let graphql_req_to_json uri q =
-  let body = `Assoc [ ("query", `String q) ] |> Yojson.Safe.to_string in
+let graphql_req_to_json ?(variables = []) uri q =
+  let body =
+    `Assoc [ ("query", `String q); ("variables", `Assoc variables) ]
+    |> Yojson.Safe.to_string
+  in
   let _resp, body = await @@ Client.post ~body:(`String body) ~headers uri in
   let body = await @@ Cohttp_lwt.Body.to_string body in
   Yojson.Safe.from_string body
@@ -99,7 +73,47 @@ let version =
 
 let set_and_get_hash uri () =
   let reason = "Test number 1" in
-  let content = graphql_req_to_json uri (set_data ~reason) in
+  let value =
+    Retirement_data.Types.
+      {
+        version = { major = 0; minor = 1; patch = None };
+        details =
+          {
+            flight_details = [];
+            train_details = [];
+            taxi_details = [];
+            additional_details = [];
+            primary_reason = `Conference;
+            secondary_reason = None;
+            reason_text = reason;
+          };
+        finance_kind = `Grant;
+        id = { crsid = "abc123"; department = "CST"; name = "Alice" };
+        offset =
+          {
+            token_id = 1234;
+            project_name = "Gola";
+            minter = "abcd1234wxyz5678";
+            kyc = "1234abcd5678wxyz";
+            amount = 556789;
+          };
+        cost_centre_details = None;
+        grant_details =
+          Some
+            {
+              sponsor_and_pi_confirmation = true;
+              award = "award";
+              project = "project";
+              task = "task";
+            };
+      }
+  in
+  let value =
+    Retirement_data.Json.string_of_t value |> Yojson.Safe.from_string
+  in
+  let content =
+    graphql_req_to_json ~variables:[ ("value", value) ] uri set_data
+  in
   let commit =
     content / "data" / "test_set_and_get" / "hash" |> Yojson.Safe.Util.to_string
   in

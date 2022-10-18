@@ -4,3 +4,5 @@ duniverse
 db
 irmin
 var
+
+*.js
