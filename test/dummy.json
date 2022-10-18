@@ -18,7 +18,7 @@
     "amount": 556789
   },
   "grantDetails": {
-    "sponsorAndPIConfirmation": true,
+    "sponsorAndPiConfirmation": true,
     "award": "award",
     "project": "project",
     "task": "task"

@@ -102,7 +102,7 @@ type travel_details <ocaml attr="deriving irmin,graphql"> = {
 }
 
 type grant_details <ocaml attr="deriving irmin,graphql"> = {
-  sponsor_and_pi_confirmation <json name="sponsorAndPIConfirmation">: bool;
+  sponsor_and_pi_confirmation <json name="sponsorAndPiConfirmation">: bool;
   award: string;
   project: string;
   task: string;
