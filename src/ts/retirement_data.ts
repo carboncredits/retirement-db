@@ -509,7 +509,7 @@ export function readTravelDetails(x: any, context: any = x): TravelDetails {
 
 export function writeGrantDetails(x: GrantDetails, context: any = x): any {
   return {
-    'sponsorAndPIConfirmation': _atd_write_required_field('GrantDetails', 'sponsor_and_pi_confirmation', _atd_write_bool, x.sponsor_and_pi_confirmation, x),
+    'sponsorAndPiConfirmation': _atd_write_required_field('GrantDetails', 'sponsor_and_pi_confirmation', _atd_write_bool, x.sponsor_and_pi_confirmation, x),
     'award': _atd_write_required_field('GrantDetails', 'award', _atd_write_string, x.award, x),
     'project': _atd_write_required_field('GrantDetails', 'project', _atd_write_string, x.project, x),
     'task': _atd_write_required_field('GrantDetails', 'task', _atd_write_string, x.task, x),
@@ -518,7 +518,7 @@ export function writeGrantDetails(x: GrantDetails, context: any = x): any {
 
 export function readGrantDetails(x: any, context: any = x): GrantDetails {
   return {
-    sponsor_and_pi_confirmation: _atd_read_required_field('GrantDetails', 'sponsorAndPIConfirmation', _atd_read_bool, x['sponsorAndPIConfirmation'], x),
+    sponsor_and_pi_confirmation: _atd_read_required_field('GrantDetails', 'sponsorAndPiConfirmation', _atd_read_bool, x['sponsorAndPiConfirmation'], x),
     award: _atd_read_required_field('GrantDetails', 'award', _atd_read_string, x['award'], x),
     project: _atd_read_required_field('GrantDetails', 'project', _atd_read_string, x['project'], x),
     task: _atd_read_required_field('GrantDetails', 'task', _atd_read_string, x['task'], x),
