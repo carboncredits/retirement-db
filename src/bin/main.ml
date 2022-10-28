@@ -1,14 +1,10 @@
 open Retirement
+module Md = Multihash_digestif
 
 let await = Lwt_eio.Promise.await_lwt
 
-module Schema =
-  Irmin_git.Schema.Make (Git_unix.Store) (Data)
-    (Irmin_git.Branch.Make (Irmin.Branch.String))
-
 module I = struct
-  module Schema = Schema
-  include Irmin_git_unix.FS.Make (Schema)
+  include Irmin_fs_unix.Make (Retirement.Schema)
 end
 
 module Store = Store.Make (I)
@@ -25,16 +21,7 @@ end
 module Server =
   Irmin_graphql_unix.Server.Make_ext (Store.I) (Remote) (Custom_types)
 
-let config root = Irmin_git.config ~bare:true root
-
-let fetch db remote =
-  let r = I.remote remote |> await in
-  match Store.Sync.pull db r `Set |> await with
-  | Ok status ->
-      Logs.info (fun f ->
-          f "Fetch %s with status %a" remote Store.Sync.pp_status status)
-  | Error e ->
-      Logs.err (fun f -> f "Failed to fetch with %a" Store.Sync.pp_pull_error e)
+let config root = Irmin_fs.config root
 
 let json_headers =
   Cohttp.Header.of_list [ ("Content-Type", "application/json") ]
@@ -92,12 +79,9 @@ let callback main schema _conn req body =
       in
       `Response r
 
-let server dir remote =
+let server dir =
   let config = config dir in
   let s = Store.repository config in
-  (match remote with
-  | Some remote -> fetch (Store.of_branch s) remote
-  | _ -> ());
   let schema = Server.schema s in
   let main = Store.of_branch s in
   Cohttp_lwt_unix.Server.make_response_action ~callback:(callback main schema)
@@ -115,11 +99,6 @@ let logs =
   let docs = Manpage.s_common_options in
   Term.(const init $ Fmt_cli.style_renderer ~docs () $ Logs_cli.level ~docs ())
 
-let remote =
-  Arg.value
-  @@ Arg.opt Arg.(some string) None
-  @@ Arg.info ~doc:"The remote to fetch from" ~docv:"REMOTE" [ "remote" ]
-
 let directory =
   Arg.value
   @@ Arg.opt Arg.string "/tmp/projects"
@@ -136,8 +115,8 @@ let port =
   Arg.value @@ Arg.opt Arg.int 8080
   @@ Arg.info ~doc:"The port to run the server on" ~docv:"PORT" [ "port" ]
 
-let serve' ?remote ~dir ~src:_ ~port () =
-  let server = server dir remote in
+let serve' ~dir ~src:_ ~port () =
+  let server = server dir in
   let ctx = Lazy.force Conduit_lwt_unix.default_ctx in
   let on_exn exn = Logs.err (fun f -> f "Error: %a" Fmt.exn exn) in
   let ctx = Cohttp_lwt_unix.Net.init ~ctx () in
@@ -145,13 +124,10 @@ let serve' ?remote ~dir ~src:_ ~port () =
   Cohttp_lwt_unix.Server.create ~on_exn ~ctx ~mode:(`TCP (`Port port)) server
 
 let serve _fs =
-  let serve () remote dir src port =
-    await @@ serve' ?remote ~dir ~src ~port ()
-  in
+  let serve () dir src port = await @@ serve' ~dir ~src ~port () in
   let doc = "Serve a project repository over a GraphQL interface" in
   let info = Cmd.info "serve" ~doc in
-  Cmd.v info
-  @@ Term.(const serve $ logs $ remote $ directory $ const "::" $ port)
+  Cmd.v info @@ Term.(const serve $ logs $ directory $ const "::" $ port)
 
 let add_project stdin =
   let add () dir path =
