@@ -9,6 +9,7 @@
   fmt.cli
   logs.cli
   irmin-graphql.unix
-  irmin-git.unix
+  irmin-fs.unix
+  multihash-digestif
   retirement
   dune-build-info))

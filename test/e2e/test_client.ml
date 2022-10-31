@@ -1,4 +1,6 @@
 module Client = Cohttp_lwt_unix.Client
+module Md = Multihash_digestif
+module Store = Irmin_mem.Make (Retirement.Schema)
 
 let await = Lwt_eio.Promise.await_lwt
 
@@ -71,66 +73,69 @@ let version =
   Alcotest.of_pp (fun ppf v ->
       Fmt.pf ppf "%s" (Retirement_data.Json.string_of_version v))
 
+(* let multihash = Alcotest.testable Md.pp Md.equal *)
+
 let set_and_get_hash uri () =
   let reason = "Test number 1" in
   let value =
-    Retirement_data.Types.
+    Retirement.Data.v
+      ~version:{ major = 0; minor = 1; patch = None }
+      { crsid = "abc123"; department = "CST"; name = "Alice" }
+      (`Grant
+        {
+          sponsor_and_pi_confirmation = true;
+          award = "award";
+          project = "project";
+          task = "task";
+        })
       {
-        version = { major = 0; minor = 1; patch = None };
-        details =
-          {
-            flight_details = [];
-            train_details = [];
-            taxi_details = [];
-            additional_details = [];
-            primary_reason = `Conference;
-            secondary_reason = None;
-            reason_text = reason;
-          };
-        finance_kind = `Grant;
-        id = { crsid = "abc123"; department = "CST"; name = "Alice" };
-        offset =
-          {
-            token_id = 1234;
-            project_name = "Gola";
-            minter = "abcd1234wxyz5678";
-            kyc = "1234abcd5678wxyz";
-            amount = 556789;
-          };
-        cost_centre_details = None;
-        grant_details =
-          Some
-            {
-              sponsor_and_pi_confirmation = true;
-              award = "award";
-              project = "project";
-              task = "task";
-            };
+        flight_details = [];
+        train_details = [];
+        taxi_details = [];
+        additional_details = [];
+        primary_reason = `Conference;
+        secondary_reason = None;
+        reason_text = reason;
+      }
+      {
+        token_id = 1234;
+        project_name = "Gola";
+        minter = "abcd1234wxyz5678";
+        kyc = "1234abcd5678wxyz";
+        amount = 556789;
       }
   in
-  let value =
-    Retirement_data.Json.string_of_t value |> Yojson.Safe.from_string
+
+  let string_value =
+    Retirement.Data.to_json_string value |> Yojson.Safe.from_string
   in
   let content =
-    graphql_req_to_json ~variables:[ ("value", value) ] uri set_data
+    graphql_req_to_json ~variables:[ ("value", string_value) ] uri set_data
   in
   let commit =
     content / "data" / "test_set_and_get" / "hash" |> Yojson.Safe.Util.to_string
   in
-  let value =
+  let store_value =
     graphql_req_to_json uri
       (get_hash_from_commit_and_path ~commit ~path:"hello/world")
   in
   let hash =
-    value / "data" / "commit" / "tree" / "get_contents" / "hash"
-    |> Yojson.Safe.Util.to_string
+    store_value / "data" / "commit" / "tree" / "get_contents" / "hash"
+    |> function
+    | `String s -> s
+    | _ -> failwith "AHHHH"
   in
   let v =
-    value / "data" / "commit" / "tree" / "get_contents" / "value" / "version"
+    store_value / "data" / "commit" / "tree" / "get_contents" / "value"
+    / "version"
     |> Yojson.Safe.to_string
   in
-  print_endline v;
   let v = Retirement_data.Json.version_of_string v in
+  let mh = Store.Contents.hash value in
+  Alcotest.(check string)
+    "same hash"
+    (Irmin.Type.to_string Store.Hash.t mh)
+    hash;
   let value' = graphql_req_to_json uri (get_by_hash_query hash) in
   let reason' =
     value' / "data" / "contents" / "details" / "reasonText"

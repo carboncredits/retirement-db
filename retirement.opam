@@ -14,9 +14,10 @@ depends: [
   "dune"               {>= "2.9.0"}
   "retirement-data"    {= version}
   "irmin"              {>= "3.4.2"}
-  "irmin-git"          {>= "3.4.2"}
+  "irmin-fs"           {>= "3.4.2"}
   "irmin-graphql"      {>= "3.4.2"}
   "eio_main"           {>= "0.5"}
+  "multihash-digestif"
   "logs"
   "dune-build-info"
   "ppx_deriving_yojson"

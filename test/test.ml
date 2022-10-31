@@ -1,15 +1,7 @@
 open Retirement
-module Git_store = Git.Mem.Store
-
-module Schema =
-  Irmin_git.Schema.Make (Git_store) (Data)
-    (Irmin_git.Branch.Make (Irmin.Branch.String))
-
-module Git_mem = Irmin_git.Maker (Irmin_git.Mem) (Git.Mem.Sync (Git_store))
 
 module Irmin_store = struct
-  module Schema = Schema
-  include Git_mem.Make (Schema)
+  include Irmin_mem.Make (Retirement.Schema)
 end
 
 module Store = Store.Make (Irmin_store)

@@ -2,7 +2,7 @@
  (name test)
  (deps
   (source_tree versions))
- (libraries eio_main alcotest retirement irmin-git.unix))
+ (libraries eio_main alcotest retirement irmin.mem irmin-fs.unix))
 
 (rule
  (deps %{project_root}/src/bin/main.exe)

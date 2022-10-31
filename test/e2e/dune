@@ -1,6 +1,12 @@
 (executable
  (name test_client)
- (libraries alcotest eio_main retirement retirement-data cohttp-lwt-unix))
+ (libraries
+  alcotest
+  eio_main
+  irmin.mem
+  retirement
+  retirement-data
+  cohttp-lwt-unix))
 
 (rule
  (alias runtest)
