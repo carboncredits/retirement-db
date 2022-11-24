@@ -78,7 +78,7 @@ let version =
 let set_and_get_hash uri () =
   let reason = "Test number 1" in
   let value =
-    Retirement.Data.v
+    Retirement.Data.v ~ts:"2022-11-24T10:53:06-00:00"
       ~version:{ major = 0; minor = 1; patch = None }
       { crsid = "abc123"; department = "CST"; name = "Alice" }
       (`Grant

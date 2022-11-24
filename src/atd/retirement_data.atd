@@ -133,6 +133,7 @@ type offset <ocaml attr="deriving irmin,graphql"> = {
 
 type t <ocaml attr="deriving irmin,graphql"> = {
     version : version;
+    ts : string;
     details : travel_details;
     id : cambridge_id;
     finance_kind <json name="financeKind">: finance_kind;

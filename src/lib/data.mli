@@ -32,13 +32,14 @@ type finance_details =
 
 val v :
   ?version:Retirement_data.Types.version ->
+  ts:string ->
   Retirement_data.Types.cambridge_id ->
   finance_details ->
   Retirement_data.Types.travel_details ->
   Retirement_data.Types.offset ->
   t
-(** [v ?version details] constructs a new retirement data. If [version] is omitted, the 
-    latest version will be used. *)
+(** [v ?version ~ts details] constructs a new retirement data. If [version] is omitted, the 
+    latest version will be used. [ts] should be an RFC3339 formatted timestamp. *)
 
 val dummy_details : t
 (** Useful for tests and debugging. *)

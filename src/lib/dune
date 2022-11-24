@@ -1,6 +1,12 @@
 (library
  (name retirement)
  (public_name retirement)
- (libraries irmin multihash-digestif irmin-graphql lwt_eio retirement-data)
+ (libraries
+  irmin
+  ptime
+  multihash-digestif
+  irmin-graphql
+  lwt_eio
+  retirement-data)
  (preprocess
   (pps ppx_irmin ppx_deriving_yojson)))

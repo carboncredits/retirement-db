@@ -37,11 +37,13 @@ type finance_details =
   [ `Grant of Retirement_data.Types.grant_details
   | `CostCentre of Retirement_data.Types.cost_centre_details ]
 
-let v ?(version = Retirement_data.latest_version) id finance details offset =
+let v ?(version = Retirement_data.latest_version) ~ts id finance details offset
+    =
   match finance with
   | `Grant d ->
       {
         T.version;
+        ts;
         details;
         id;
         offset;
@@ -52,6 +54,7 @@ let v ?(version = Retirement_data.latest_version) id finance details offset =
   | `CostCentre d ->
       {
         T.version;
+        ts;
         details;
         id;
         offset;
@@ -92,7 +95,7 @@ let dummy_offset =
     }
 
 let dummy_details =
-  v
+  v ~ts:"2022-11-24T10:53:06-00:00"
     { crsid = "abc123"; department = "CST"; name = "Alice" }
     (`Grant dummy_grant_details) dummy_travel_details dummy_offset
 

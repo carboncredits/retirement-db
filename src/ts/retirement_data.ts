@@ -140,6 +140,7 @@ export type Offset = {
 
 export type T = {
   version: Version;
+  ts: string;
   details: TravelDetails;
   id: CambridgeId;
   finance_kind: FinanceKind;
@@ -603,6 +604,7 @@ export function readOffset(x: any, context: any = x): Offset {
 export function writeT(x: T, context: any = x): any {
   return {
     'version': _atd_write_required_field('T', 'version', writeVersion, x.version, x),
+    'ts': _atd_write_required_field('T', 'ts', _atd_write_string, x.ts, x),
     'details': _atd_write_required_field('T', 'details', writeTravelDetails, x.details, x),
     'id': _atd_write_required_field('T', 'id', writeCambridgeId, x.id, x),
     'financeKind': _atd_write_required_field('T', 'finance_kind', writeFinanceKind, x.finance_kind, x),
@@ -615,6 +617,7 @@ export function writeT(x: T, context: any = x): any {
 export function readT(x: any, context: any = x): T {
   return {
     version: _atd_read_required_field('T', 'version', readVersion, x['version'], x),
+    ts: _atd_read_required_field('T', 'ts', _atd_read_string, x['ts'], x),
     details: _atd_read_required_field('T', 'details', readTravelDetails, x['details'], x),
     id: _atd_read_required_field('T', 'id', readCambridgeId, x['id'], x),
     finance_kind: _atd_read_required_field('T', 'financeKind', readFinanceKind, x['financeKind'], x),
