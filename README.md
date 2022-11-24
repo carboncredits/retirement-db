@@ -21,31 +21,7 @@ dune build @install @runtest
 dune exec -- src/bin/main.exe --root=./var
 ```
 
-This creates a new git-compatible Irmin store in `<CWD>/var`. You can interact with it either through the GraphQL interface, for example:
-
-```graphql
-mutation {
-  set(
-    info: {parents: [], allow_empty: false, retries: 1, message: "Hello", author: "Me"}, value: {
-      version: { major: 0, minor: 1 }, 
-      details: {
-        flightDetails: [],
-        trainDetails: [],
-        taxiDetails: [],
-        additionalDetails: [],
-        primaryReason: "Conference",
-        reasonText: "Some reason for travelling!"
-      }
-    }, 
-    path: "hello/world",
-    branch: "main"
-  ) {
-    hash
-  }
-}
-```
-
-Or using the `irmin` cli tool, for example:
+This creates a new git-compatible Irmin store in `<CWD>/var`. You can interact with it through the `irmin` cli tool, for example:
 
 ```bash
 $ irmin get hello/world --root=./var

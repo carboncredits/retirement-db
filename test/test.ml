@@ -15,9 +15,10 @@ let same_path_projects =
   ]
 
 let add_projects store projects =
-  List.iter
+  List.map
     (fun (path, proj) -> Store.add_project store path proj |> Result.get_ok)
     projects
+  |> ignore
 
 let with_store ?(empty = true) fn =
   let config = Irmin_mem.config () in

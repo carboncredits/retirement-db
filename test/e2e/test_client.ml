@@ -3,77 +3,21 @@ module Md = Multihash_digestif
 module Store = Irmin_mem.Make (Retirement.Schema)
 
 let await = Lwt_eio.Promise.await_lwt
-
-(* Some pre-defined GraphQL queries *)
-let get_by_hash_query hash =
-  Fmt.str
-    {|
-  {
-    contents(hash: "%s"){
-      version {
-        major
-        minor
-        patch
-      }
-      details {
-        reasonText
-      }
-    }
-  }
-|}
-    hash
-
-let get_hash_from_commit_and_path ~commit ~path =
-  Fmt.str
-    {|
-  {  
-      commit(hash: "%s") {
-          tree {
-      get_contents(path: "%s") {
-          hash
-          value {
-            version {
-              major
-              minor
-              patch
-            }
-          }
-      }}
-      }
-  }
-|}
-    commit path
-
-let set_data =
-  Fmt.str
-    {|
-  mutation {
-    test_set_and_get(info: {parents: [], allow_empty: false, retries: 1, message: "Hello", author: "Me"}, set: $value, path: "hello/world", branch: "main") {
-      hash
-      info {
-        message
-      }
-    }
-  }
-|}
-
 let headers = Cohttp.Header.of_list [ ("Content-Type", "application/json") ]
 let ( / ) t s = Yojson.Safe.Util.member s t
 
-let graphql_req_to_json ?(variables = []) uri q =
-  let body =
-    `Assoc [ ("query", `String q); ("variables", `Assoc variables) ]
-    |> Yojson.Safe.to_string
-  in
+let req_to_json response uri body =
   let _resp, body = await @@ Client.post ~body:(`String body) ~headers uri in
   let body = await @@ Cohttp_lwt.Body.to_string body in
-  Yojson.Safe.from_string body
+  response body
 
-let version =
+let store_content =
   Alcotest.of_pp (fun ppf v ->
-      Fmt.pf ppf "%s" (Retirement_data.Json.string_of_version v))
+      Fmt.pf ppf "%s" (Retirement_data.Json.string_of_t v))
 
 (* let multihash = Alcotest.testable Md.pp Md.equal *)
+
+module Rest = Retirement.Data.Rest
 
 let set_and_get_hash uri () =
   let reason = "Test number 1" in
@@ -105,45 +49,40 @@ let set_and_get_hash uri () =
         amount = 556789;
       }
   in
-
   let string_value =
-    Retirement.Data.to_json_string value |> Yojson.Safe.from_string
+    Retirement_data.Types.{ path = [ "hello" ]; value }
+    |> Rest.Request.set_to_json
   in
   let content =
-    graphql_req_to_json ~variables:[ ("value", string_value) ] uri set_data
+    req_to_json Rest.Response.set_of_json (Uri.with_path uri "/add")
+      string_value
   in
-  let commit =
-    content / "data" / "test_set_and_get" / "hash" |> Yojson.Safe.Util.to_string
+  let commit = content.data in
+  let get_hash_value =
+    Retirement_data.Types.{ path = [ "hello" ]; commit }
+    |> Rest.Request.get_hash_to_json
   in
   let store_value =
-    graphql_req_to_json uri
-      (get_hash_from_commit_and_path ~commit ~path:"hello/world")
+    req_to_json Rest.Response.get_hash_of_json
+      (Uri.with_path uri "/get/hash")
+      get_hash_value
   in
-  let hash =
-    store_value / "data" / "commit" / "tree" / "get_contents" / "hash"
-    |> function
-    | `String s -> s
-    | _ -> failwith "AHHHH"
-  in
-  let v =
-    store_value / "data" / "commit" / "tree" / "get_contents" / "value"
-    / "version"
-    |> Yojson.Safe.to_string
-  in
-  let v = Retirement_data.Json.version_of_string v in
+  let hash = store_value.data in
   let mh = Store.Contents.hash value in
   Alcotest.(check string)
     "same hash"
     (Irmin.Type.to_string Store.Hash.t mh)
     hash;
-  let value' = graphql_req_to_json uri (get_by_hash_query hash) in
-  let reason' =
-    value' / "data" / "contents" / "details" / "reasonText"
-    |> Yojson.Safe.Util.to_string
+  let get_content_value =
+    Retirement_data.Types.{ hash } |> Rest.Request.get_content_to_json
   in
-  Alcotest.(check string) "same reason text" reason reason';
-  Alcotest.(check version)
-    "same version number" Retirement_data.latest_version v
+  let stored_value =
+    req_to_json Rest.Response.get_content_of_json
+      (Uri.with_path uri "/get/content")
+      get_content_value
+  in
+  let v' = stored_value.data in
+  Alcotest.(check store_content) "same stored content" value v'
 
 let client () =
   let uri =

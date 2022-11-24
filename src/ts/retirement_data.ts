@@ -158,6 +158,30 @@ export type OnChain = {
   hash: string;
 }
 
+export type SetRequest = {
+  path: string[];
+  value: T;
+}
+
+export type GetHashRequest = {
+  commit: string;
+  path: string[];
+}
+
+export type GetContentRequest = {
+  hash: string;
+}
+
+export type StringResponse = {
+  errors: string[];
+  data: string;
+}
+
+export type TResponse = {
+  errors: string[];
+  data: T;
+}
+
 export function writeVersion(x: Version, context: any = x): any {
   return {
     'major': _atd_write_required_field('Version', 'major', _atd_write_int, x.major, x),
@@ -649,6 +673,74 @@ export function readOnChain(x: any, context: any = x): OnChain {
     total_co2e: _atd_read_required_field('OnChain', 'totalCo2e', _atd_read_float, x['totalCo2e'], x),
     number_of_flights: _atd_read_required_field('OnChain', 'numberOfFlights', _atd_read_int, x['numberOfFlights'], x),
     hash: _atd_read_required_field('OnChain', 'hash', _atd_read_string, x['hash'], x),
+  };
+}
+
+export function writeSetRequest(x: SetRequest, context: any = x): any {
+  return {
+    'path': _atd_write_required_field('SetRequest', 'path', _atd_write_array(_atd_write_string), x.path, x),
+    'value': _atd_write_required_field('SetRequest', 'value', writeT, x.value, x),
+  };
+}
+
+export function readSetRequest(x: any, context: any = x): SetRequest {
+  return {
+    path: _atd_read_required_field('SetRequest', 'path', _atd_read_array(_atd_read_string), x['path'], x),
+    value: _atd_read_required_field('SetRequest', 'value', readT, x['value'], x),
+  };
+}
+
+export function writeGetHashRequest(x: GetHashRequest, context: any = x): any {
+  return {
+    'commit': _atd_write_required_field('GetHashRequest', 'commit', _atd_write_string, x.commit, x),
+    'path': _atd_write_required_field('GetHashRequest', 'path', _atd_write_array(_atd_write_string), x.path, x),
+  };
+}
+
+export function readGetHashRequest(x: any, context: any = x): GetHashRequest {
+  return {
+    commit: _atd_read_required_field('GetHashRequest', 'commit', _atd_read_string, x['commit'], x),
+    path: _atd_read_required_field('GetHashRequest', 'path', _atd_read_array(_atd_read_string), x['path'], x),
+  };
+}
+
+export function writeGetContentRequest(x: GetContentRequest, context: any = x): any {
+  return {
+    'hash': _atd_write_required_field('GetContentRequest', 'hash', _atd_write_string, x.hash, x),
+  };
+}
+
+export function readGetContentRequest(x: any, context: any = x): GetContentRequest {
+  return {
+    hash: _atd_read_required_field('GetContentRequest', 'hash', _atd_read_string, x['hash'], x),
+  };
+}
+
+export function writeStringResponse(x: StringResponse, context: any = x): any {
+  return {
+    'errors': _atd_write_required_field('StringResponse', 'errors', _atd_write_array(_atd_write_string), x.errors, x),
+    'data': _atd_write_required_field('StringResponse', 'data', _atd_write_string, x.data, x),
+  };
+}
+
+export function readStringResponse(x: any, context: any = x): StringResponse {
+  return {
+    errors: _atd_read_required_field('StringResponse', 'errors', _atd_read_array(_atd_read_string), x['errors'], x),
+    data: _atd_read_required_field('StringResponse', 'data', _atd_read_string, x['data'], x),
+  };
+}
+
+export function writeTResponse(x: TResponse, context: any = x): any {
+  return {
+    'errors': _atd_write_required_field('TResponse', 'errors', _atd_write_array(_atd_write_string), x.errors, x),
+    'data': _atd_write_required_field('TResponse', 'data', writeT, x.data, x),
+  };
+}
+
+export function readTResponse(x: any, context: any = x): TResponse {
+  return {
+    errors: _atd_read_required_field('TResponse', 'errors', _atd_read_array(_atd_read_string), x['errors'], x),
+    data: _atd_read_required_field('TResponse', 'data', readT, x['data'], x),
   };
 }
 

@@ -1,32 +1,32 @@
 <doc text="Retirement Data Types">
 
-type version <ocaml attr="deriving irmin,graphql"> = { major: int; minor: int; ?patch: int option }
+type version <ocaml attr="deriving irmin"> = { major: int; minor: int; ?patch: int option }
 
-type flight_trip <ocaml attr="deriving irmin,graphql"> = [
+type flight_trip <ocaml attr="deriving irmin"> = [
     | None <json name="none">
     | One_way <json name="one-way">
     | Round_trip <json name="round-trip">
 ]
 
-type flight_class <ocaml attr="deriving irmin,graphql"> = [
+type flight_class <ocaml attr="deriving irmin"> = [
     | First <json name="first">
     | Business <json name="business">
     | Premium_economy <json name="premium-economy">
     | Economy <json name="economy">
 ]
 
-type flight_type <ocaml attr="deriving irmin,graphql"> = [
+type flight_type <ocaml attr="deriving irmin"> = [
     | Scheduled <json name="scheduled">
     | Chartered <json name="chartered">
 ]
 
-type airport <ocaml attr="deriving irmin,graphql"> = {
+type airport <ocaml attr="deriving irmin"> = {
     id: string;
     name: string;
     iata_code <json name="iataCode"> : string;
 }
 
-type flight_details <ocaml attr="deriving irmin,graphql"> = {
+type flight_details <ocaml attr="deriving irmin"> = {
     departure : airport;
     arrival : airport;
     passenger_count <json name="passengerCount"> : int;
@@ -36,12 +36,12 @@ type flight_details <ocaml attr="deriving irmin,graphql"> = {
     aircraft_type <json name="aircraftType"> : string;
 }
 
-type train_class <ocaml attr="deriving irmin,graphql"> = [ 
+type train_class <ocaml attr="deriving irmin"> = [ 
     | Standard <json name="standard">
     | First_class <json name="first-class">
 ]
 
-type train_details <ocaml attr="deriving irmin,graphql"> = {
+type train_details <ocaml attr="deriving irmin"> = {
     origin : string;
     destination : string;
     via : string list;
@@ -50,7 +50,7 @@ type train_details <ocaml attr="deriving irmin,graphql"> = {
     number_of_people <json name="numberOfPeople"> : int;
 }
 
-type journey_time <ocaml attr="deriving irmin,graphql"> = [
+type journey_time <ocaml attr="deriving irmin"> = [
     | Zero_to_five <json name="0-5m"> 
     | Five_to_ten <json name="5-10m"> 
     | Ten_to_twenty_five <json name="10-25m"> 
@@ -58,7 +58,7 @@ type journey_time <ocaml attr="deriving irmin,graphql"> = [
     | Fifty_plus <json name="50m+"> 
 ]
 
-type taxi_type <ocaml attr="deriving irmin,graphql"> = [
+type taxi_type <ocaml attr="deriving irmin"> = [
     | Electric <json name="electric"> 
     | Hybrid <json name="hybrid"> 
     | Standard <json name="standard"> 
@@ -66,19 +66,19 @@ type taxi_type <ocaml attr="deriving irmin,graphql"> = [
     | Airport_shuttle <json name="airport shuttle"> 
 ]
 
-type taxi_details <ocaml attr="deriving irmin,graphql"> = {
+type taxi_details <ocaml attr="deriving irmin"> = {
     journey_time <json name="journeyTime"> : journey_time;
     number_of_people <json name="numberOfPeople"> : int;
     taxi_type <json name="taxiType"> : taxi_type;
 }
 
-type additional_details <ocaml attr="deriving irmin,graphql"> = {
+type additional_details <ocaml attr="deriving irmin"> = {
     journey_time <json name="journeyTime"> : journey_time;
     number_of_people <json name="numberOfPeople"> : int;
     type_ <json name="type"> : string;
 }
 
-type reason <ocaml attr="deriving irmin,graphql"> = [
+type reason <ocaml attr="deriving irmin"> = [
     | Conference <json name="Conference">
     | Meeting_with_collaborators <json name="Meeting with collaborators">
     | Giving_an_invited_talk <json name="Giving an invited talk/lecture">
@@ -91,7 +91,7 @@ type reason <ocaml attr="deriving irmin,graphql"> = [
     | Other <json name="Other">
 ]
 
-type travel_details <ocaml attr="deriving irmin,graphql"> = {
+type travel_details <ocaml attr="deriving irmin"> = {
     flight_details <json name="flightDetails"> : flight_details list;
     train_details <json name="trainDetails"> : train_details list;
     taxi_details <json name="taxiDetails"> : taxi_details list;
@@ -101,29 +101,29 @@ type travel_details <ocaml attr="deriving irmin,graphql"> = {
     reason_text <json name="reasonText"> : string;
 }
 
-type grant_details <ocaml attr="deriving irmin,graphql"> = {
+type grant_details <ocaml attr="deriving irmin"> = {
   sponsor_and_pi_confirmation <json name="sponsorAndPiConfirmation">: bool;
   award: string;
   project: string;
   task: string;
 }
 
-type cost_centre_details <ocaml attr="deriving irmin,graphql"> = {
+type cost_centre_details <ocaml attr="deriving irmin"> = {
   budget_holder_confirmation <json name="budgetHolderConfirmation">: bool;
   department: string;
   cost_centre <json name="costCentre">: string;
   source: string;
 }
 
-type finance_kind <ocaml attr="deriving irmin,graphql"> = [ Grant | CostCentre ]
+type finance_kind <ocaml attr="deriving irmin"> = [ Grant | CostCentre ]
 
-type cambridge_id <ocaml attr="deriving irmin,graphql"> = {
+type cambridge_id <ocaml attr="deriving irmin"> = {
   crsid: string;
   name: string;
   department: string;
 }
 
-type offset <ocaml attr="deriving irmin,graphql"> = {
+type offset <ocaml attr="deriving irmin"> = {
     token_id <json name="tokenId">: int;
     project_name <json name="projectName">: string;
     minter : string;
@@ -131,7 +131,7 @@ type offset <ocaml attr="deriving irmin,graphql"> = {
     amount : int;
 }
 
-type t <ocaml attr="deriving irmin,graphql"> = {
+type t <ocaml attr="deriving irmin"> = {
     version : version;
     details : travel_details;
     id : cambridge_id;
@@ -151,4 +151,30 @@ type on_chain = {
   total_co2e <json name="totalCo2e">: float; (** Total co2e of all flights stored in kilograms. *)
   number_of_flights <json name="numberOfFlights">: int; (** Number of flights in this transaction. *)
   hash : string; (** The unique hash of the corresponding private data. *)
+}
+
+(* HTTP REST API *)
+type set_request = {
+    path : string list;
+    value : t;
+}
+
+type get_hash_request = {
+    commit : string;
+    path : string list;
+}
+
+type get_content_request = {
+    hash : string;
+}
+
+(* Slight limitation of ATDTS *)
+type string_response = {
+    errors : string list;
+    data : string;
+}
+
+type t_response = {
+    errors : string list;
+    data : t;
 }

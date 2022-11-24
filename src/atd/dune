@@ -15,4 +15,4 @@
  (public_name retirement-data)
  (libraries yojson atdgen-runtime irmin graphql-lwt)
  (preprocess
-  (pps ppx_irmin ppx_deriving_graphql)))
+  (pps ppx_irmin)))
