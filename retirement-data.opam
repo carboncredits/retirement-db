@@ -15,9 +15,11 @@ depends: [
   "atdgen"               {>= "2.10.0"} # For the OCaml bindings generation
   "atdts"                {>= "2.10.0"} # For the typescript bindings generation
   "ppx_irmin"            {>= "3.4.2"}
-  "ppx_deriving_graphql" {= "dev"}
 ]
 synopsis: "Project metadata JSON codec and types"
 pin-depends:[
-  ["ppx_deriving_graphql.dev" "git+https://github.com/patricoferris/ppx_deriving_graphql#aec4c67442f63a54dc6d0da118c3a729042f8820"]
+  # For TS parameterised types!
+  ["atd.dev" "https://github.com/ahrefs/atd#245d302788b88d01283640df4963c1463d12c890"]
+  ["atdgen.dev" "https://github.com/ahrefs/atd#245d302788b88d01283640df4963c1463d12c890"]
+  ["atdts.dev" "https://github.com/ahrefs/atd#245d302788b88d01283640df4963c1463d12c890"]
 ]

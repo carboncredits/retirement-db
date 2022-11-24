@@ -172,3 +172,7 @@ type 'a response = {
     errors : string list;
     data : 'a;
 }
+
+(* Slight limitation of ATDTS *)
+type string_response = string response
+type t_response = t response
