@@ -18,48 +18,102 @@ module Custom_types = struct
   module Contents = Data
 end
 
-module Server =
-  Irmin_graphql_unix.Server.Make_ext (Store.I) (Remote) (Custom_types)
-
 let config root = Irmin_fs.config root
 
 let json_headers =
   Cohttp.Header.of_list [ ("Content-Type", "application/json") ]
 
-let callback main schema _conn req body =
+let current_api_version = "v1"
+
+let response_with_body body =
+  let open Lwt.Syntax in
+  let+ r =
+    Cohttp_lwt_unix.Server.respond_string ~headers:json_headers ~status:`OK
+      ~body ()
+  in
+  `Response r
+
+let send_error err =
+  let resp =
+    Retirement_data.Json.string_of_response Buffer.add_string
+      { errors = [ err ]; data = "Failure" }
+  in
+  response_with_body resp
+
+module Rest = Retirement.Data.Rest
+
+let v1_callback repo main _conn req body =
   let open Cohttp_lwt in
   let open Lwt.Syntax in
   match
     ( Request.meth req,
       Astring.String.cuts ~empty:false ~sep:"/" (Request.resource req) )
   with
-  | `POST, [ "graphql" ] -> (
-      let+ res = Server.execute_request schema req body in
-      match res with
-      | `Response (r, b) ->
-          (* TODO: The `*` option is for development purposes only *)
-          let headers =
-            Cohttp.Header.add r.headers "Access-Control-Allow-Origin" "*"
-          in
-          `Response ({ r with headers }, b)
-      | v -> v)
-  | `OPTIONS, [ "graphql" ] ->
-      Logs.info (fun f -> f "Answering options request for graphql endpoint");
-      let headers =
-        Cohttp.Header.of_list
-          [
-            ("Access-Control-Allow-Origin", "*");
-            ("Access-Control-Allow-Methods", "POST");
-            ("Access-Control-Allow-Methods", "GET");
-            ("Access-Control-Max-Age", "86400");
-            ("Access-Control-Allow-Headers", "Content-Type");
-          ]
+  | `POST, [ "add" ] -> (
+      let* data = Cohttp_lwt.Body.to_string body in
+      let data =
+        try Ok (Retirement_data.Json.set_request_of_string data)
+        with _ -> Error (`Msg "Failed to parse the request arguments")
       in
-      let+ r =
-        Cohttp_lwt_unix.Server.respond ~headers ~status:`No_content
-          ~body:Cohttp_lwt.Body.empty ()
+      match data with
+      | Error (`Msg m) -> send_error m
+      | Ok data -> (
+          match Store.add_project main data.path data.value with
+          | Error e ->
+              let body =
+                Retirement_data.Json.string_of_response Buffer.add_string
+                  { errors = [ Store.add_error_to_string e ]; data = "Failure" }
+              in
+              response_with_body body
+          | Ok None ->
+              let body =
+                Retirement_data.Json.string_of_response Buffer.add_string
+                  { errors = [ "No commit was made" ]; data = "Failure" }
+              in
+              response_with_body body
+          | Ok (Some commit) ->
+              let body =
+                Rest.Response.set_to_json { errors = []; data = commit }
+              in
+              response_with_body body))
+  | `POST, [ "get"; "hash" ] -> (
+      let* data = Cohttp_lwt.Body.to_string body in
+      let data =
+        try Ok (Retirement_data.Json.get_hash_request_of_string data)
+        with _ -> Error (`Msg "Failed to parse the request arguments")
       in
-      `Response r
+      match data with
+      | Error (`Msg m) -> send_error m
+      | Ok data -> (
+          match Store.of_commit repo data.commit with
+          | Error (`Msg m) -> send_error m
+          | Ok store ->
+              let project = Store.get_project store data.path in
+              let hash =
+                I.Contents.hash project |> Irmin.Type.to_string I.Hash.t
+              in
+              let response =
+                Rest.Response.get_hash_to_json { errors = []; data = hash }
+              in
+              response_with_body response))
+  | `POST, [ "get"; "content" ] -> (
+      let* data = Cohttp_lwt.Body.to_string body in
+      let data =
+        try Ok (Retirement_data.Json.get_content_request_of_string data)
+        with _ -> Error (`Msg "Failed to parse the request arguments")
+      in
+      match data with
+      | Error (`Msg m) -> send_error m
+      | Ok data -> (
+          match Store.get_project_by_hash repo data.hash with
+          | Error (`Msg m) -> send_error m
+          | Ok None -> send_error ("No project found at hash " ^ data.hash)
+          | Ok (Some project) ->
+              let response =
+                Rest.Response.get_content_to_json
+                  { errors = []; data = project }
+              in
+              response_with_body response))
   | `GET, [ "json"; year; month ] ->
       let items =
         Store.get_all main [ year; month ] |> Data.list_to_json_string
@@ -81,10 +135,9 @@ let callback main schema _conn req body =
 
 let server dir =
   let config = config dir in
-  let s = Store.repository config in
-  let schema = Server.schema s in
-  let main = Store.of_branch s in
-  Cohttp_lwt_unix.Server.make_response_action ~callback:(callback main schema)
+  let repo = Store.repository config in
+  let main = Store.of_branch repo in
+  Cohttp_lwt_unix.Server.make_response_action ~callback:(v1_callback repo main)
     ()
 
 open Cmdliner
@@ -137,7 +190,7 @@ let add_project stdin =
     let () = Eio.Flow.(copy stdin (buffer_sink buf)) in
     let segs = String.split_on_char '/' path in
     match Store.add_project_json main segs (Buffer.contents buf) with
-    | Ok () -> ()
+    | Ok _hash -> ()
     | Error _ -> Fmt.epr "Failed to store!"
   in
   let doc = "Add a project using JSON read from stdin" in

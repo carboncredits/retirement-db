@@ -1,4 +1,4 @@
-type t
+type t = Retirement_data.Types.t
 (** A type representing retirement data. *)
 
 val of_string : string -> (t, [ `Msg of string ]) result
@@ -44,4 +44,37 @@ val dummy_details : t
 (** Useful for tests and debugging. *)
 
 include Irmin.Contents.S with type t := t
-include Irmin_graphql.Server.CUSTOM_TYPE with type t := t
+
+module Rest : sig
+  module Request : sig
+    type set = Retirement_data.Types.set_request
+
+    val set_to_json : ?len:int -> set -> string
+
+    type get_hash = Retirement_data.Types.get_hash_request
+
+    val get_hash_to_json : ?len:int -> get_hash -> string
+
+    type get_content = Retirement_data.Types.get_content_request
+
+    val get_content_to_json : ?len:int -> get_content -> string
+  end
+
+  module Response : sig
+    type set = string Retirement_data.Types.response
+    (** The result of setting a new value in the store, returns the hash of the value. *)
+
+    val set_to_json : ?len:int -> set -> string
+    val set_of_json : string -> set
+
+    type get_hash = string Retirement_data.Types.response
+
+    val get_hash_to_json : ?len:int -> get_hash -> string
+    val get_hash_of_json : string -> get_hash
+
+    type get_content = t Retirement_data.Types.response
+
+    val get_content_to_json : ?len:int -> get_content -> string
+    val get_content_of_json : string -> get_content
+  end
+end
