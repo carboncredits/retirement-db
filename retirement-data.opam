@@ -17,9 +17,3 @@ depends: [
   "ppx_irmin"            {>= "3.4.2"}
 ]
 synopsis: "Project metadata JSON codec and types"
-pin-depends:[
-  # For TS parameterised types!
-  ["atd.dev" "https://github.com/ahrefs/atd#245d302788b88d01283640df4963c1463d12c890"]
-  ["atdgen.dev" "https://github.com/ahrefs/atd#245d302788b88d01283640df4963c1463d12c890"]
-  ["atdts.dev" "https://github.com/ahrefs/atd#245d302788b88d01283640df4963c1463d12c890"]
-]
