@@ -104,30 +104,30 @@ module Rest = struct
   end
 
   module Response = struct
-    type set = string Retirement_data.Types.response
+    type set = Retirement_data.Types.string_response
     (** The result of setting a new value in the store, returns the hash of the value. *)
 
     let set_to_json =
-      Retirement_data.Json.string_of_response Yojson.Safe.write_string
+      Retirement_data.Json.string_of_string_response
 
     let set_of_json =
-      Retirement_data.Json.response_of_string Yojson.Safe.read_string
+      Retirement_data.Json.string_response_of_string
 
-    type get_hash = string Retirement_data.Types.response
+    type get_hash = Retirement_data.Types.string_response
 
     let get_hash_to_json =
-      Retirement_data.Json.string_of_response Yojson.Safe.write_string
+      Retirement_data.Json.string_of_string_response
 
     let get_hash_of_json =
-      Retirement_data.Json.response_of_string Yojson.Safe.read_string
+      Retirement_data.Json.string_response_of_string
 
-    type get_content = t Retirement_data.Types.response
+    type get_content = Retirement_data.Types.t_response
     (** The result of setting a new value in the store, returns the hash of the value. *)
 
     let get_content_to_json =
-      Retirement_data.Json.string_of_response Retirement_data.Json.write_t
+      Retirement_data.Json.string_of_t_response
 
     let get_content_of_json =
-      Retirement_data.Json.response_of_string Retirement_data.Json.read_t
+      Retirement_data.Json.t_response_of_string
   end
 end

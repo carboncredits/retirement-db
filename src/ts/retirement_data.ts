@@ -172,10 +172,6 @@ export type GetContentRequest = {
   hash: string;
 }
 
-export type StringResponse = StringResponse
-
-export type TResponse = TResponse
-
 export type StringResponse = {
   errors: string[];
   data: string;
@@ -718,22 +714,6 @@ export function readGetContentRequest(x: any, context: any = x): GetContentReque
   return {
     hash: _atd_read_required_field('GetContentRequest', 'hash', _atd_read_string, x['hash'], x),
   };
-}
-
-export function writeStringResponse(x: StringResponse, context: any = x): any {
-  return writeStringResponse(x, context);
-}
-
-export function readStringResponse(x: any, context: any = x): StringResponse {
-  return readStringResponse(x, context);
-}
-
-export function writeTResponse(x: TResponse, context: any = x): any {
-  return writeTResponse(x, context);
-}
-
-export function readTResponse(x: any, context: any = x): TResponse {
-  return readTResponse(x, context);
 }
 
 export function writeStringResponse(x: StringResponse, context: any = x): any {

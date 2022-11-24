@@ -35,7 +35,7 @@ let response_with_body body =
 
 let send_error err =
   let resp =
-    Retirement_data.Json.string_of_response Buffer.add_string
+    Retirement_data.Json.string_of_string_response
       { errors = [ err ]; data = "Failure" }
   in
   response_with_body resp
@@ -61,13 +61,13 @@ let v1_callback repo main _conn req body =
           match Store.add_project main data.path data.value with
           | Error e ->
               let body =
-                Retirement_data.Json.string_of_response Buffer.add_string
+                Retirement_data.Json.string_of_string_response
                   { errors = [ Store.add_error_to_string e ]; data = "Failure" }
               in
               response_with_body body
           | Ok None ->
               let body =
-                Retirement_data.Json.string_of_response Buffer.add_string
+                Retirement_data.Json.string_of_string_response
                   { errors = [ "No commit was made" ]; data = "Failure" }
               in
               response_with_body body
