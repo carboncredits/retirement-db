@@ -185,7 +185,7 @@ let serve' ~env ~dir ~src:_ ~port () =
 
 let serve env =
   let serve () dir src port = serve' ~env ~dir ~src ~port () in
-  let doc = "Serve a project repository over a GraphQL interface" in
+  let doc = "Serve a project repository over an HTTP interface" in
   let info = Cmd.info "serve" ~doc in
   Cmd.v info @@ Term.(const serve $ logs $ directory $ const "::" $ port)
 
@@ -239,6 +239,6 @@ let version =
 
 let () =
   Eio_main.run @@ fun env ->
-  let doc = "an irmin-graphql server for retirement data" in
+  let doc = "an irmin http server for retirement data" in
   let info = Cmd.info "retirement-db" ~doc ~version in
   exit (Cmd.eval @@ Cmd.group info (cmds env))
