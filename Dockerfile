@@ -1,4 +1,4 @@
-FROM ocaml/opam:alpine-3.15-ocaml-5.0@sha256:618a7806bbc108fd731e741606ece74e8ada761434c870b8e152f79bbc12f68c as build
+FROM ocaml/opam:alpine-3.15-ocaml-5.0@sha256:c30eb992e95bced3e82ef1ec7e8fa46f9226f7628b848f98b0d485b688112578 as build
 RUN cd ~/opam-repository && git pull origin -q master && git reset --hard 29fbc663922a665200da5e906f94fb4828816092 && opam update
 RUN opam repo add alpha https://github.com/kit-ty-kate/opam-alpha-repository.git
 RUN sudo apk add gmp-dev libffi-dev linux-headers
