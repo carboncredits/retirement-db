@@ -1,14 +1,35 @@
-module Client = Cohttp_lwt_unix.Client
+open Eio
+module Client = Cohttp_eio.Client
 module Md = Multihash_digestif
 module Store = Irmin_mem.Make (Retirement.Schema)
 
-let await = Lwt_eio.Promise.await_lwt
-let headers = Cohttp.Header.of_list [ ("Content-Type", "application/json") ]
+let headers = Http.Header.of_list [ ("Content-Type", "application/json") ]
 let ( / ) t s = Yojson.Safe.Util.member s t
 
-let req_to_json response uri body =
-  let _resp, body = await @@ Client.post ~body:(`String body) ~headers uri in
-  let body = await @@ Cohttp_lwt.Body.to_string body in
+let get_json ?headers ~net http (uri, resource) =
+  let host, ip =
+    match Uri.host uri with
+    | None -> Fmt.failwith "Missing host in URL %a" Uri.pp uri
+    | Some host -> (
+        match (Unix.gethostbyname host).h_addr_list with
+        | [||] -> Fmt.failwith "Unknown host %S in URL %a" host Uri.pp uri
+        | arr -> (host, arr.(0))
+        | exception Not_found ->
+            Fmt.failwith "Unknown host %S in URL %a" host Uri.pp uri)
+  in
+  let port = Uri.port uri |> Option.value ~default:8080 in
+  let addr = `Tcp (Eio_unix.Ipaddr.of_unix ip, port) in
+  Switch.run @@ fun sw ->
+  let conn = Net.connect ~sw net addr in
+  let resp = http ?headers ~conn ("http://" ^ host) port resource in
+  Client.read_fixed resp
+
+let req_to_json ~net response ~host ~path body =
+  let open Cohttp_eio in
+  let http ?headers ~conn host port path =
+    Client.post ~conn ~body:(Body.Fixed body) ?headers (host, Some port) path
+  in
+  let body = get_json ~headers ~net http (host, path) in
   response body
 
 let store_content =
@@ -19,7 +40,7 @@ let store_content =
 
 module Rest = Retirement.Data.Rest
 
-let set_and_get_hash uri () =
+let set_and_get_hash ~net host () =
   let reason = "Test number 1" in
   let value =
     Retirement.Data.v
@@ -54,8 +75,7 @@ let set_and_get_hash uri () =
     |> Rest.Request.set_to_json
   in
   let content =
-    req_to_json Rest.Response.set_of_json (Uri.with_path uri "/add")
-      string_value
+    req_to_json ~net Rest.Response.set_of_json ~host ~path:"/add" string_value
   in
   let commit = content.data in
   let get_hash_value =
@@ -63,8 +83,7 @@ let set_and_get_hash uri () =
     |> Rest.Request.get_hash_to_json
   in
   let store_value =
-    req_to_json Rest.Response.get_hash_of_json
-      (Uri.with_path uri "/get/hash")
+    req_to_json ~net Rest.Response.get_hash_of_json ~host ~path:"/get/hash"
       get_hash_value
   in
   let hash = store_value.data in
@@ -77,24 +96,22 @@ let set_and_get_hash uri () =
     Retirement_data.Types.{ hash } |> Rest.Request.get_content_to_json
   in
   let stored_value =
-    req_to_json Rest.Response.get_content_of_json
-      (Uri.with_path uri "/get/content")
-      get_content_value
+    req_to_json ~net Rest.Response.get_content_of_json ~host
+      ~path:"/get/content" get_content_value
   in
   let v' = stored_value.data in
   Alcotest.(check store_content) "same stored content" value v'
 
-let client () =
+let client net () =
   let uri =
-    try
-      Uri.make ~scheme:"http" ~host:(Sys.getenv "SERVER_HOST") ~port:9090
-        ~path:"graphql" ()
-    with Not_found -> Uri.of_string "http://127.0.0.1:9090/graphql"
+    Uri.of_string
+    @@ try Sys.getenv "SERVER_HOST" with Not_found -> "http://localhost:9090"
   in
   Alcotest.run ~and_exit:false "retirement-db-e2e"
     [
       ( "basic",
-        [ Alcotest.test_case "get-and-set" `Quick (set_and_get_hash uri) ] );
+        [ Alcotest.test_case "get-and-set" `Quick (set_and_get_hash ~net uri) ]
+      );
     ]
 
 let with_process (v, argv) f =
@@ -119,11 +136,12 @@ let () =
           "--port";
           "9090";
           "--verbosity";
-          "info";
+          "debug";
         |] )
       (fun () ->
         Eio_unix.sleep 2.;
         f ())
   in
   Eio_main.run @@ fun env ->
-  Lwt_eio.with_event_loop ~clock:env#clock @@ fun _token -> run client
+  let net = Eio.Stdenv.net env in
+  run (client net)

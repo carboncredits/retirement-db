@@ -4,11 +4,10 @@
  (public_name retirement)
  (libraries
   eio_main
-  lwt_eio
   fmt.tty
   fmt.cli
   logs.cli
-  irmin-graphql.unix
+  cohttp-eio
   irmin-fs.unix
   multihash-digestif
   retirement
