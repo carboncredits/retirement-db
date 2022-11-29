@@ -1,5 +1,5 @@
 FROM ocaml/opam:alpine-3.15-ocaml-5.0@sha256:c30eb992e95bced3e82ef1ec7e8fa46f9226f7628b848f98b0d485b688112578 as build
-RUN cd ~/opam-repository && git pull origin -q master && git reset --hard 29fbc663922a665200da5e906f94fb4828816092 && opam update
+RUN cd ~/opam-repository && git pull origin -q master && git reset --hard 2b82c83694d8f1db63e504823646ffcb51562f75 && opam update
 RUN opam repo add alpha https://github.com/kit-ty-kate/opam-alpha-repository.git
 RUN sudo apk add gmp-dev libffi-dev linux-headers
 COPY --chown=opam retirement.opam retirement-data.opam /src/
