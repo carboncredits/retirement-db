@@ -149,7 +149,6 @@ type on_chain = {
   version : version; (** Version of the on-chain data. *)
   total_distance <json name="totalDistance">: float; (** Total distance for all flights in retirement. *)
   total_co2e <json name="totalCo2e">: float; (** Total co2e of all flights stored in kilograms. *)
-  number_of_flights <json name="numberOfFlights">: int; (** Number of flights in this transaction. *)
   hash : string; (** The unique hash of the corresponding private data. *)
 }
 

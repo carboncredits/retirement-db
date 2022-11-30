@@ -154,7 +154,6 @@ export type OnChain = {
   version: Version;
   total_distance: number;
   total_co2e: number;
-  number_of_flights: Int;
   hash: string;
 }
 
@@ -661,7 +660,6 @@ export function writeOnChain(x: OnChain, context: any = x): any {
     'version': _atd_write_required_field('OnChain', 'version', writeVersion, x.version, x),
     'totalDistance': _atd_write_required_field('OnChain', 'total_distance', _atd_write_float, x.total_distance, x),
     'totalCo2e': _atd_write_required_field('OnChain', 'total_co2e', _atd_write_float, x.total_co2e, x),
-    'numberOfFlights': _atd_write_required_field('OnChain', 'number_of_flights', _atd_write_int, x.number_of_flights, x),
     'hash': _atd_write_required_field('OnChain', 'hash', _atd_write_string, x.hash, x),
   };
 }
@@ -671,7 +669,6 @@ export function readOnChain(x: any, context: any = x): OnChain {
     version: _atd_read_required_field('OnChain', 'version', readVersion, x['version'], x),
     total_distance: _atd_read_required_field('OnChain', 'totalDistance', _atd_read_float, x['totalDistance'], x),
     total_co2e: _atd_read_required_field('OnChain', 'totalCo2e', _atd_read_float, x['totalCo2e'], x),
-    number_of_flights: _atd_read_required_field('OnChain', 'numberOfFlights', _atd_read_int, x['numberOfFlights'], x),
     hash: _atd_read_required_field('OnChain', 'hash', _atd_read_string, x['hash'], x),
   };
 }
