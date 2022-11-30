@@ -6,7 +6,7 @@
   irmin.mem
   retirement
   retirement-data
-  cohttp-lwt-unix))
+  cohttp-eio))
 
 (rule
  (alias runtest)

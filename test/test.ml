@@ -14,17 +14,18 @@ let same_path_projects =
     ([ "2022"; "1"; "b" ], Data.dummy_details);
   ]
 
-let add_projects store projects =
+let add_projects ~clock store projects =
   List.map
-    (fun (path, proj) -> Store.add_project store path proj |> Result.get_ok)
+    (fun (path, proj) ->
+      Store.add_project ~clock store path proj |> Result.get_ok)
     projects
   |> ignore
 
-let with_store ?(empty = true) fn =
+let with_store ?(empty = true) ~clock fn =
   let config = Irmin_mem.config () in
   let repo = Store.repository config in
   let main = Store.of_branch repo in
-  if empty then fn main else add_projects main projects;
+  if empty then fn main else add_projects ~clock main projects;
   fn main
 
 let project = Alcotest.of_pp Data.pp
@@ -45,15 +46,15 @@ let test_backwards_compat dir =
       | Error (`Msg s) -> Alcotest.fail ("Parsing failed with: " ^ s))
     files
 
-let test_read () =
-  with_store ~empty:false @@ fun main ->
+let test_read ~clock () =
+  with_store ~clock ~empty:false @@ fun main ->
   let path_1, proj_1 = List.hd projects in
   let proj = Store.get_project main path_1 in
   Alcotest.check project "same project" proj_1 proj
 
-let test_get_all () =
-  with_store ~empty:true @@ fun main ->
-  add_projects main same_path_projects;
+let test_get_all ~clock () =
+  with_store ~clock ~empty:true @@ fun main ->
+  add_projects ~clock main same_path_projects;
   let real = List.map snd same_path_projects in
   let projs = Store.get_all main [ "2022"; "1" ] in
   Alcotest.(check (list project)) "same projects" real projs
@@ -65,10 +66,13 @@ let () =
     let cwd = Eio.Stdenv.cwd env in
     Eio.Path.(cwd / "versions")
   in
-  Lwt_eio.with_event_loop ~clock:env#clock @@ fun _id ->
+  let clock = Eio.Stdenv.clock env in
   Alcotest.run "project database"
     [
       ( "basics",
-        [ test_case "read" test_read; test_case "get-all" test_get_all ] );
+        [
+          test_case "read" (test_read ~clock);
+          test_case "get-all" (test_get_all ~clock);
+        ] );
       ("low-level", test_backwards_compat dir);
     ]

@@ -85,7 +85,7 @@ let dummy_details =
     (`Grant dummy_grant_details) dummy_travel_details dummy_offset
 
 let details t = t.T.details
-let merge' ~old:_ t1 _t2 = Lwt.return (Ok t1)
+let merge' ~old:_ t1 _t2 = Ok t1
 let merge = Irmin.Merge.(option (v t merge'))
 
 module Rest = struct
@@ -107,27 +107,18 @@ module Rest = struct
     type set = Retirement_data.Types.string_response
     (** The result of setting a new value in the store, returns the hash of the value. *)
 
-    let set_to_json =
-      Retirement_data.Json.string_of_string_response
-
-    let set_of_json =
-      Retirement_data.Json.string_response_of_string
+    let set_to_json = Retirement_data.Json.string_of_string_response
+    let set_of_json = Retirement_data.Json.string_response_of_string
 
     type get_hash = Retirement_data.Types.string_response
 
-    let get_hash_to_json =
-      Retirement_data.Json.string_of_string_response
-
-    let get_hash_of_json =
-      Retirement_data.Json.string_response_of_string
+    let get_hash_to_json = Retirement_data.Json.string_of_string_response
+    let get_hash_of_json = Retirement_data.Json.string_response_of_string
 
     type get_content = Retirement_data.Types.t_response
     (** The result of setting a new value in the store, returns the hash of the value. *)
 
-    let get_content_to_json =
-      Retirement_data.Json.string_of_t_response
-
-    let get_content_of_json =
-      Retirement_data.Json.t_response_of_string
+    let get_content_to_json = Retirement_data.Json.string_of_t_response
+    let get_content_of_json = Retirement_data.Json.t_response_of_string
   end
 end

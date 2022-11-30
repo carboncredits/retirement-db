@@ -27,7 +27,12 @@ module type S = sig
   val add_error_to_string : add_error -> string
 
   val add_project_json :
-    ?msg:string -> I.t -> I.path -> string -> (string option, add_error) result
+    ?msg:string ->
+    clock:Eio.Time.clock ->
+    I.t ->
+    I.path ->
+    string ->
+    (string option, add_error) result
   (** Add a project from raw JSON. This will try to parse the JSON into a project
       and may fail to do so, otherwise the failure is to do with persisting the
       data to the store.
@@ -35,7 +40,12 @@ module type S = sig
       Returns the commit hash if successful. *)
 
   val add_project :
-    ?msg:string -> I.t -> I.path -> Data.t -> (string option, add_error) result
+    ?msg:string ->
+    clock:Eio.Time.clock ->
+    I.t ->
+    I.path ->
+    Data.t ->
+    (string option, add_error) result
   (** Like {! add_project_json} but using a {! Project.t} instead. These can be
         built with {! Project.v}. Returns the commit hash if successful. *)
 
