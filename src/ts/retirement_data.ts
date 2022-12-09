@@ -140,10 +140,12 @@ export type Offset = {
 
 export type T = {
   version: Version;
+  ts: string;
   details: TravelDetails;
   id: CambridgeId;
   finance_kind: FinanceKind;
   offset: Offset;
+  tx_id?: string;
   cost_centre_details?: CostCentreDetails;
   grant_details?: GrantDetails;
 }
@@ -157,9 +159,18 @@ export type OnChain = {
   hash: string;
 }
 
-export type SetRequest = {
+export type BeginTxRequest = {
   path: string[];
   value: T;
+}
+
+export type CompleteTxRequest = {
+  hash: string;
+  tx_id: string;
+}
+
+export type CheckTxStatusRequest = {
+  hash: string;
 }
 
 export type GetHashRequest = {
@@ -174,6 +185,16 @@ export type GetContentRequest = {
 export type StringResponse = {
   errors: string[];
   data: string;
+}
+
+export type TxStatus =
+| { kind: 'Pending' }
+| { kind: 'Complete' }
+| { kind: 'Not_started' }
+
+export type TxStatusResponse = {
+  errors: string[];
+  data: TxStatus;
 }
 
 export type TResponse = {
@@ -626,10 +647,12 @@ export function readOffset(x: any, context: any = x): Offset {
 export function writeT(x: T, context: any = x): any {
   return {
     'version': _atd_write_required_field('T', 'version', writeVersion, x.version, x),
+    'ts': _atd_write_required_field('T', 'ts', _atd_write_string, x.ts, x),
     'details': _atd_write_required_field('T', 'details', writeTravelDetails, x.details, x),
     'id': _atd_write_required_field('T', 'id', writeCambridgeId, x.id, x),
     'financeKind': _atd_write_required_field('T', 'finance_kind', writeFinanceKind, x.finance_kind, x),
     'offset': _atd_write_required_field('T', 'offset', writeOffset, x.offset, x),
+    'tx_id': _atd_write_optional_field(_atd_write_string, x.tx_id, x),
     'costCentreDetails': _atd_write_optional_field(writeCostCentreDetails, x.cost_centre_details, x),
     'grantDetails': _atd_write_optional_field(writeGrantDetails, x.grant_details, x),
   };
@@ -638,10 +661,12 @@ export function writeT(x: T, context: any = x): any {
 export function readT(x: any, context: any = x): T {
   return {
     version: _atd_read_required_field('T', 'version', readVersion, x['version'], x),
+    ts: _atd_read_required_field('T', 'ts', _atd_read_string, x['ts'], x),
     details: _atd_read_required_field('T', 'details', readTravelDetails, x['details'], x),
     id: _atd_read_required_field('T', 'id', readCambridgeId, x['id'], x),
     finance_kind: _atd_read_required_field('T', 'financeKind', readFinanceKind, x['financeKind'], x),
     offset: _atd_read_required_field('T', 'offset', readOffset, x['offset'], x),
+    tx_id: _atd_read_optional_field(_atd_read_string, x['tx_id'], x),
     cost_centre_details: _atd_read_optional_field(readCostCentreDetails, x['costCentreDetails'], x),
     grant_details: _atd_read_optional_field(readGrantDetails, x['grantDetails'], x),
   };
@@ -673,17 +698,43 @@ export function readOnChain(x: any, context: any = x): OnChain {
   };
 }
 
-export function writeSetRequest(x: SetRequest, context: any = x): any {
+export function writeBeginTxRequest(x: BeginTxRequest, context: any = x): any {
   return {
-    'path': _atd_write_required_field('SetRequest', 'path', _atd_write_array(_atd_write_string), x.path, x),
-    'value': _atd_write_required_field('SetRequest', 'value', writeT, x.value, x),
+    'path': _atd_write_required_field('BeginTxRequest', 'path', _atd_write_array(_atd_write_string), x.path, x),
+    'value': _atd_write_required_field('BeginTxRequest', 'value', writeT, x.value, x),
   };
 }
 
-export function readSetRequest(x: any, context: any = x): SetRequest {
+export function readBeginTxRequest(x: any, context: any = x): BeginTxRequest {
   return {
-    path: _atd_read_required_field('SetRequest', 'path', _atd_read_array(_atd_read_string), x['path'], x),
-    value: _atd_read_required_field('SetRequest', 'value', readT, x['value'], x),
+    path: _atd_read_required_field('BeginTxRequest', 'path', _atd_read_array(_atd_read_string), x['path'], x),
+    value: _atd_read_required_field('BeginTxRequest', 'value', readT, x['value'], x),
+  };
+}
+
+export function writeCompleteTxRequest(x: CompleteTxRequest, context: any = x): any {
+  return {
+    'hash': _atd_write_required_field('CompleteTxRequest', 'hash', _atd_write_string, x.hash, x),
+    'tx_id': _atd_write_required_field('CompleteTxRequest', 'tx_id', _atd_write_string, x.tx_id, x),
+  };
+}
+
+export function readCompleteTxRequest(x: any, context: any = x): CompleteTxRequest {
+  return {
+    hash: _atd_read_required_field('CompleteTxRequest', 'hash', _atd_read_string, x['hash'], x),
+    tx_id: _atd_read_required_field('CompleteTxRequest', 'tx_id', _atd_read_string, x['tx_id'], x),
+  };
+}
+
+export function writeCheckTxStatusRequest(x: CheckTxStatusRequest, context: any = x): any {
+  return {
+    'hash': _atd_write_required_field('CheckTxStatusRequest', 'hash', _atd_write_string, x.hash, x),
+  };
+}
+
+export function readCheckTxStatusRequest(x: any, context: any = x): CheckTxStatusRequest {
+  return {
+    hash: _atd_read_required_field('CheckTxStatusRequest', 'hash', _atd_read_string, x['hash'], x),
   };
 }
 
@@ -724,6 +775,45 @@ export function readStringResponse(x: any, context: any = x): StringResponse {
   return {
     errors: _atd_read_required_field('StringResponse', 'errors', _atd_read_array(_atd_read_string), x['errors'], x),
     data: _atd_read_required_field('StringResponse', 'data', _atd_read_string, x['data'], x),
+  };
+}
+
+export function writeTxStatus(x: TxStatus, context: any = x): any {
+  switch (x.kind) {
+    case 'Pending':
+      return 'Pending'
+    case 'Complete':
+      return 'Complete'
+    case 'Not_started':
+      return 'Not_started'
+  }
+}
+
+export function readTxStatus(x: any, context: any = x): TxStatus {
+  switch (x) {
+    case 'Pending':
+      return { kind: 'Pending' }
+    case 'Complete':
+      return { kind: 'Complete' }
+    case 'Not_started':
+      return { kind: 'Not_started' }
+    default:
+      _atd_bad_json('TxStatus', x, context)
+      throw new Error('impossible')
+  }
+}
+
+export function writeTxStatusResponse(x: TxStatusResponse, context: any = x): any {
+  return {
+    'errors': _atd_write_required_field('TxStatusResponse', 'errors', _atd_write_array(_atd_write_string), x.errors, x),
+    'data': _atd_write_required_field('TxStatusResponse', 'data', writeTxStatus, x.data, x),
+  };
+}
+
+export function readTxStatusResponse(x: any, context: any = x): TxStatusResponse {
+  return {
+    errors: _atd_read_required_field('TxStatusResponse', 'errors', _atd_read_array(_atd_read_string), x['errors'], x),
+    data: _atd_read_required_field('TxStatusResponse', 'data', readTxStatus, x['data'], x),
   };
 }
 

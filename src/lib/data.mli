@@ -30,8 +30,19 @@ type finance_details =
   [ `Grant of Retirement_data.Types.grant_details
   | `CostCentre of Retirement_data.Types.cost_centre_details ]
 
+val current_ts : Eio.Time.clock -> string
+(** Current time in RFC3339 format. *)
+
+val ts_to_date : string -> int * int * int
+(** Convert an RFC3339 timestamp to year, month and date. *)
+
+val get_path : digest:(t -> string) -> t -> string list
+(** Converts a [t] to the path where it will be stored. *)
+
 val v :
   ?version:Retirement_data.Types.version ->
+  ?tx_id:string ->
+  timestamp:string ->
   Retirement_data.Types.cambridge_id ->
   finance_details ->
   Retirement_data.Types.travel_details ->
@@ -40,16 +51,24 @@ val v :
 (** [v ?version details] constructs a new retirement data. If [version] is omitted, the 
     latest version will be used. *)
 
-val dummy_details : t
+val dummy_details : ?tx_id:string -> Eio.Time.clock -> t
 (** Useful for tests and debugging. *)
 
 include Irmin.Contents.S with type t := t
 
 module Rest : sig
   module Request : sig
-    type set = Retirement_data.Types.set_request
+    type begin_tx = Retirement_data.Types.begin_tx_request
 
-    val set_to_json : ?len:int -> set -> string
+    val begin_tx_to_json : ?len:int -> begin_tx -> string
+
+    type complete_tx = Retirement_data.Types.complete_tx_request
+
+    val complete_tx_to_json : ?len:int -> complete_tx -> string
+
+    type check_tx_status = Retirement_data.Types.check_tx_status_request
+
+    val check_tx_status_to_json : ?len:int -> check_tx_status -> string
 
     type get_hash = Retirement_data.Types.get_hash_request
 
@@ -61,11 +80,22 @@ module Rest : sig
   end
 
   module Response : sig
-    type set = Retirement_data.Types.string_response
-    (** The result of setting a new value in the store, returns the hash of the value. *)
+    type begin_tx = Retirement_data.Types.string_response
+    (* Returns the hash of the value. *)
 
-    val set_to_json : ?len:int -> set -> string
-    val set_of_json : string -> set
+    val begin_tx_to_json : ?len:int -> begin_tx -> string
+    val begin_tx_of_json : string -> begin_tx
+
+    type complete_tx = Retirement_data.Types.string_response
+    (* Returns the hash of the latest commit in the store *)
+
+    val complete_tx_to_json : ?len:int -> complete_tx -> string
+    val complete_tx_of_json : string -> complete_tx
+
+    type check_tx_status = Retirement_data.Types.tx_status_response
+
+    val check_tx_status_to_json : ?len:int -> check_tx_status -> string
+    val check_tx_status_of_json : string -> check_tx_status
 
     type get_hash = Retirement_data.Types.string_response
 

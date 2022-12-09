@@ -36,15 +36,21 @@ let store_content =
   Alcotest.of_pp (fun ppf v ->
       Fmt.pf ppf "%s" (Retirement_data.Json.string_of_t v))
 
+let status =
+  Alcotest.of_pp (fun ppf v ->
+      Fmt.pf ppf "%s" (Retirement_data.Json.string_of_tx_status v))
+
 (* let multihash = Alcotest.testable Md.pp Md.equal *)
 
 module Rest = Retirement.Data.Rest
 
-let set_and_get_hash ~net host () =
+let set_and_get_hash ~clock ~net host () =
   let reason = "Test number 1" in
+  let timestamp = Retirement.Data.current_ts clock in
   let value =
     Retirement.Data.v
       ~version:{ major = 0; minor = 1; patch = None }
+      ~timestamp
       { crsid = "abc123"; department = "CST"; name = "Alice" }
       (`Grant
         {
@@ -70,23 +76,14 @@ let set_and_get_hash ~net host () =
         amount = 556789;
       }
   in
-  let string_value =
-    Retirement_data.Types.{ path = [ "hello" ]; value }
-    |> Rest.Request.set_to_json
+  let begin_value =
+    Retirement_data.Types.{ value } |> Rest.Request.begin_tx_to_json
   in
   let content =
-    req_to_json ~net Rest.Response.set_of_json ~host ~path:"/add" string_value
+    req_to_json ~net Rest.Response.begin_tx_of_json ~host ~path:"/tx/begin"
+      begin_value
   in
-  let commit = content.data in
-  let get_hash_value =
-    Retirement_data.Types.{ path = [ "hello" ]; commit }
-    |> Rest.Request.get_hash_to_json
-  in
-  let store_value =
-    req_to_json ~net Rest.Response.get_hash_of_json ~host ~path:"/get/hash"
-      get_hash_value
-  in
-  let hash = store_value.data in
+  let hash = content.data in
   let mh = Store.Contents.hash value in
   Alcotest.(check string)
     "same hash"
@@ -100,9 +97,17 @@ let set_and_get_hash ~net host () =
       ~path:"/get/content" get_content_value
   in
   let v' = stored_value.data in
-  Alcotest.(check store_content) "same stored content" value v'
+  Alcotest.(check store_content) "same stored content" value v';
+  let check_value =
+    Retirement_data.Types.{ hash } |> Rest.Request.check_tx_status_to_json
+  in
+  let check =
+    req_to_json ~net Rest.Response.check_tx_status_of_json ~host
+      ~path:"/tx/status" check_value
+  in
+  Alcotest.(check status) "same tx status" `Pending check.data
 
-let client net () =
+let client clock net () =
   let uri =
     Uri.of_string
     @@ try Sys.getenv "SERVER_HOST" with Not_found -> "http://localhost:9090"
@@ -110,8 +115,10 @@ let client net () =
   Alcotest.run ~and_exit:false "retirement-db-e2e"
     [
       ( "basic",
-        [ Alcotest.test_case "get-and-set" `Quick (set_and_get_hash ~net uri) ]
-      );
+        [
+          Alcotest.test_case "get-and-set" `Quick
+            (set_and_get_hash ~clock ~net uri);
+        ] );
     ]
 
 let with_process (v, argv) f =
@@ -144,4 +151,5 @@ let () =
   in
   Eio_main.run @@ fun env ->
   let net = Eio.Stdenv.net env in
-  run (client net)
+  let clock = Eio.Stdenv.clock env in
+  run (client clock net)

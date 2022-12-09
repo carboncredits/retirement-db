@@ -25,24 +25,40 @@ type finance_details =
   [ `Grant of Retirement_data.Types.grant_details
   | `CostCentre of Retirement_data.Types.cost_centre_details ]
 
-let v ?(version = Retirement_data.latest_version) id finance details offset =
+let current_ts clock =
+  Eio.Time.now clock |> Ptime.of_float_s |> Option.get |> Ptime.to_rfc3339
+
+let ts_to_date ts =
+  let t, _, _ = Ptime.of_rfc3339 ts |> Result.get_ok in
+  Ptime.to_date t
+
+let get_path ~digest (t : t) =
+  let year, month, _ = ts_to_date t.ts in
+  [ string_of_int year; string_of_int month; digest t ]
+
+let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp id finance
+    details offset =
   match finance with
   | `Grant d ->
       {
         T.version;
+        ts = timestamp;
         details;
         id;
         offset;
         finance_kind = `Grant;
+        tx_id;
         grant_details = Some d;
         cost_centre_details = None;
       }
   | `CostCentre d ->
       {
         T.version;
+        ts = timestamp;
         details;
         id;
         offset;
+        tx_id;
         finance_kind = `CostCentre;
         grant_details = None;
         cost_centre_details = Some d;
@@ -79,8 +95,8 @@ let dummy_offset =
       amount = 556789;
     }
 
-let dummy_details =
-  v
+let dummy_details ?tx_id clock =
+  v ~timestamp:(current_ts clock) ?tx_id
     { crsid = "abc123"; department = "CST"; name = "Alice" }
     (`Grant dummy_grant_details) dummy_travel_details dummy_offset
 
@@ -90,9 +106,18 @@ let merge = Irmin.Merge.(option (v t merge'))
 
 module Rest = struct
   module Request = struct
-    type set = Retirement_data.Types.set_request
+    type begin_tx = Retirement_data.Types.begin_tx_request
 
-    let set_to_json = Retirement_data.Json.string_of_set_request
+    let begin_tx_to_json = Retirement_data.Json.string_of_begin_tx_request
+
+    type complete_tx = Retirement_data.Types.complete_tx_request
+
+    let complete_tx_to_json = Retirement_data.Json.string_of_complete_tx_request
+
+    type check_tx_status = Retirement_data.Types.check_tx_status_request
+
+    let check_tx_status_to_json =
+      Retirement_data.Json.string_of_check_tx_status_request
 
     type get_hash = Retirement_data.Types.get_hash_request
 
@@ -104,11 +129,25 @@ module Rest = struct
   end
 
   module Response = struct
-    type set = Retirement_data.Types.string_response
-    (** The result of setting a new value in the store, returns the hash of the value. *)
+    type begin_tx = Retirement_data.Types.string_response
+    (** Returns the hash of the value. *)
 
-    let set_to_json = Retirement_data.Json.string_of_string_response
-    let set_of_json = Retirement_data.Json.string_response_of_string
+    let begin_tx_to_json = Retirement_data.Json.string_of_string_response
+    let begin_tx_of_json = Retirement_data.Json.string_response_of_string
+
+    type complete_tx = Retirement_data.Types.string_response
+    (** Returns the hash of the latest merged commit in the transaction store. *)
+
+    let complete_tx_to_json = Retirement_data.Json.string_of_string_response
+    let complete_tx_of_json = Retirement_data.Json.string_response_of_string
+
+    type check_tx_status = Retirement_data.Types.tx_status_response
+
+    let check_tx_status_to_json =
+      Retirement_data.Json.string_of_tx_status_response
+
+    let check_tx_status_of_json =
+      Retirement_data.Json.tx_status_response_of_string
 
     type get_hash = Retirement_data.Types.string_response
 

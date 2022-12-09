@@ -2,19 +2,19 @@
  (name test)
  (deps
   (source_tree versions))
- (libraries eio_main alcotest retirement irmin.mem irmin-fs.unix))
+ (libraries eio_main eio.mock alcotest retirement irmin.mem irmin-fs.unix))
 
-(rule
- (deps %{project_root}/src/bin/main.exe)
- (targets dummy.out)
- (action
-  (with-stdout-to
-   dummy.out
-   (run %{project_root}/src/bin/main.exe dummy))))
+; (rule
+;  (deps %{project_root}/src/bin/main.exe)
+;  (targets dummy.out)
+;  (action
+;   (with-stdout-to
+;    dummy.out
+;    (run %{project_root}/src/bin/main.exe dummy))))
 
-(rule
- (alias runtest)
- (action
-  (diff dummy.json dummy.out)))
+; (rule
+;  (alias runtest)
+;  (action
+;   (diff dummy.json dummy.out)))
 
 (data_only_dirs versions)
