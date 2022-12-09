@@ -8,10 +8,6 @@ end
 
 module Store = Store.Make (I)
 
-module Remote = struct
-  let remote = None
-end
-
 let config root = Irmin_fs.config root
 
 let json_headers s =
@@ -21,7 +17,7 @@ let json_headers s =
       ("Content-Length", string_of_int @@ String.length s);
     ]
 
-let current_api_version = "v1"
+let _current_api_version = "v1"
 
 let response_with_body body =
   ( Http.Response.make ~headers:(json_headers body) ~status:`OK (),
@@ -162,12 +158,6 @@ let directory =
   @@ Arg.info ~doc:"The directory on the filesystem to use for the repository"
        ~docv:"DIRECTORY" [ "directory" ]
 
-let path =
-  Arg.required
-  @@ Arg.opt Arg.(some string) None
-  @@ Arg.info ~doc:"The / segmented path for the value to be stored at"
-       ~docv:"PATH" [ "path" ]
-
 let port =
   Arg.value @@ Arg.opt Arg.int 8080
   @@ Arg.info ~doc:"The port to run the server on" ~docv:"PORT" [ "port" ]
@@ -271,18 +261,6 @@ let check_tx ~fs stdin =
   let doc = "For a particular hash, prints the status of the transaction." in
   let info = Cmd.info "check-tx" ~doc in
   Cmd.v info @@ Term.(const check $ logs $ directory)
-
-let dummy_details =
-  Retirement_data.Types.
-    {
-      flight_details = [];
-      train_details = [];
-      taxi_details = [];
-      additional_details = [];
-      primary_reason = `Conference;
-      secondary_reason = None;
-      reason_text = "Some reason for travelling!";
-    }
 
 let dummy clock stdout =
   let dummy () =

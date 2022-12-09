@@ -4,6 +4,9 @@
   (source_tree versions))
  (libraries eio_main eio.mock alcotest retirement irmin.mem irmin-fs.unix))
 
+(mdx
+ (files README.md))
+
 ; (rule
 ;  (deps %{project_root}/src/bin/main.exe)
 ;  (targets dummy.out)

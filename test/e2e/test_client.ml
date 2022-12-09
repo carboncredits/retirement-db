@@ -4,7 +4,6 @@ module Md = Multihash_digestif
 module Store = Irmin_mem.Make (Retirement.Schema)
 
 let headers = Http.Header.of_list [ ("Content-Type", "application/json") ]
-let ( / ) t s = Yojson.Safe.Util.member s t
 
 let get_json ?headers ~net http (uri, resource) =
   let host, ip =
