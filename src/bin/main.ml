@@ -105,6 +105,25 @@ let v1_callback ~clock repo main ((req, body, _) : Cohttp_eio.Server.request) =
                   { errors = []; data = project }
               in
               response_with_body response))
+  | `POST, [ "get"; "content"; "hash" ] -> (
+      (* Getting the content hash also does a uniqueness look up in the
+         store as we want gaurantee this. This is a limitation that we
+         can't get around: if we don't store the value immediately then
+         there's a chance by the time we come to store the value (when
+         the Tezos transaction goes through) something already exists with
+         that hash! We try to make the value sufficiently unique so this
+         would nearly never happen... *)
+      match
+        read_body req body
+          Retirement_data.Json.get_content_hash_request_of_string
+      with
+      | Error (`Msg m) -> send_error m
+      | Ok data ->
+          let hash = Store.content_hash data.value in
+          let response =
+            Rest.Response.get_content_hash_to_json { errors = []; data = hash }
+          in
+          response_with_body response)
   | `GET, [ "json"; year; month ] ->
       let items =
         Store.get_all main [ year; month ] |> Data.list_to_json_string

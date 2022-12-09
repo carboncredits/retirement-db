@@ -62,6 +62,9 @@ module type S = sig
 
   val find_project : I.t -> I.path -> Data.t option
   (** Like {! get_project} only will wrap [Not_found] into an option. *)
+
+  val content_hash : Data.t -> string
+  (** Digest the content like it would be in the store. *)
 end
 
 module type Make = functor (Arg : Data_store) -> S

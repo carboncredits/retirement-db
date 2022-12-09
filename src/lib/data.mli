@@ -51,6 +51,10 @@ module Rest : sig
 
     val set_to_json : ?len:int -> set -> string
 
+    type get_content_hash = Retirement_data.Types.get_content_hash_request
+
+    val get_content_hash_to_json : ?len:int -> get_content_hash -> string
+
     type get_hash = Retirement_data.Types.get_hash_request
 
     val get_hash_to_json : ?len:int -> get_hash -> string
@@ -66,6 +70,12 @@ module Rest : sig
 
     val set_to_json : ?len:int -> set -> string
     val set_of_json : string -> set
+
+    type get_content_hash = Retirement_data.Types.string_response
+    (** The result of setting a new value in the store, returns the hash of the value. *)
+
+    val get_content_hash_to_json : ?len:int -> set -> string
+    val get_content_hash_of_json : string -> set
 
     type get_hash = Retirement_data.Types.string_response
 

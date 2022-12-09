@@ -70,6 +70,13 @@ let set_and_get_hash ~net host () =
         amount = 556789;
       }
   in
+  let get_content_hash =
+    Retirement_data.Types.{ value } |> Rest.Request.get_content_hash_to_json
+  in
+  let content_hash =
+    req_to_json ~net Rest.Response.get_content_hash_of_json ~host
+      ~path:"/get/content/hash" get_content_hash
+  in
   let string_value =
     Retirement_data.Types.{ path = [ "hello" ]; value }
     |> Rest.Request.set_to_json
@@ -89,9 +96,10 @@ let set_and_get_hash ~net host () =
   let hash = store_value.data in
   let mh = Store.Contents.hash value in
   Alcotest.(check string)
-    "same hash"
+    "same hash locally"
     (Irmin.Type.to_string Store.Hash.t mh)
     hash;
+  Alcotest.(check string) "same hash remotely" content_hash.data hash;
   let get_content_value =
     Retirement_data.Types.{ hash } |> Rest.Request.get_content_to_json
   in

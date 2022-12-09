@@ -158,6 +158,10 @@ type set_request = {
     value : t;
 }
 
+type get_content_hash_request = {
+    value : t;
+}
+
 type get_hash_request = {
     commit : string;
     path : string list;

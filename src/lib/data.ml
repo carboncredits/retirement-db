@@ -94,6 +94,11 @@ module Rest = struct
 
     let set_to_json = Retirement_data.Json.string_of_set_request
 
+    type get_content_hash = Retirement_data.Types.get_content_hash_request
+
+    let get_content_hash_to_json =
+      Retirement_data.Json.string_of_get_content_hash_request
+
     type get_hash = Retirement_data.Types.get_hash_request
 
     let get_hash_to_json = Retirement_data.Json.string_of_get_hash_request
@@ -109,6 +114,14 @@ module Rest = struct
 
     let set_to_json = Retirement_data.Json.string_of_string_response
     let set_of_json = Retirement_data.Json.string_response_of_string
+
+    type get_content_hash = Retirement_data.Types.string_response
+
+    let get_content_hash_to_json =
+      Retirement_data.Json.string_of_string_response
+
+    let get_content_hash_of_json =
+      Retirement_data.Json.string_response_of_string
 
     type get_hash = Retirement_data.Types.string_response
 

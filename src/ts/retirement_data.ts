@@ -162,6 +162,10 @@ export type SetRequest = {
   value: T;
 }
 
+export type GetContentHashRequest = {
+  value: T;
+}
+
 export type GetHashRequest = {
   commit: string;
   path: string[];
@@ -684,6 +688,18 @@ export function readSetRequest(x: any, context: any = x): SetRequest {
   return {
     path: _atd_read_required_field('SetRequest', 'path', _atd_read_array(_atd_read_string), x['path'], x),
     value: _atd_read_required_field('SetRequest', 'value', readT, x['value'], x),
+  };
+}
+
+export function writeGetContentHashRequest(x: GetContentHashRequest, context: any = x): any {
+  return {
+    'value': _atd_write_required_field('GetContentHashRequest', 'value', writeT, x.value, x),
+  };
+}
+
+export function readGetContentHashRequest(x: any, context: any = x): GetContentHashRequest {
+  return {
+    value: _atd_read_required_field('GetContentHashRequest', 'value', readT, x['value'], x),
   };
 }
 

@@ -80,4 +80,5 @@ module Make (S : Project_store) = struct
       [] items
 
   let find_project s path = I.find s path
+  let content_hash t = I.Contents.hash t |> Irmin.Type.to_string I.Hash.t
 end

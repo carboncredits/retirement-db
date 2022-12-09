@@ -13,6 +13,7 @@ build: [
 depends: [
   "dune"               {>= "2.9.0"}
   "retirement-data"    {= version}
+  "mtime"              {< "2.0.0"}
   "irmin"              {= "dev"}
   "irmin-fs"           {= "dev"}
   "eio_main"           {>= "0.5"}
