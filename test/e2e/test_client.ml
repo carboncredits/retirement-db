@@ -104,7 +104,35 @@ let set_and_get_hash ~clock ~net host () =
     req_to_json ~net Rest.Response.check_tx_status_of_json ~host
       ~path:"/tx/status" check_value
   in
-  Alcotest.(check status) "same tx status" `Pending check.data
+  Alcotest.(check status) "same tx status" `Pending check.data;
+  let complete_value =
+    Retirement_data.Types.{ hash; tx_id = "ABCDEFGH" }
+    |> Rest.Request.complete_tx_to_json
+  in
+  let _check =
+    req_to_json ~net Rest.Response.complete_tx_of_json ~host
+      ~path:"/tx/complete" complete_value
+  in
+  let check_value =
+    Retirement_data.Types.{ hash } |> Rest.Request.check_tx_status_to_json
+  in
+  let check =
+    req_to_json ~net Rest.Response.check_tx_status_of_json ~host
+      ~path:"/tx/status" check_value
+  in
+  Alcotest.(check bool)
+    "same tx status" true
+    (match check.data with `Complete _ -> true | _ -> false);
+  (* This should fail because we've already added the value *)
+  let begin_value =
+    Retirement_data.Types.{ value } |> Rest.Request.begin_tx_to_json
+  in
+  let content =
+    req_to_json ~net Rest.Response.begin_tx_of_json ~host ~path:"/tx/begin"
+      begin_value
+  in
+  let errors = content.errors in
+  Alcotest.(check int) "same errors" 1 (List.length errors)
 
 let client clock net () =
   let uri =
@@ -141,8 +169,8 @@ let () =
           "./var";
           "--port";
           "9090";
-          "--verbosity";
-          "debug";
+          (* "--verbosity"; *)
+          (* "debug"; *)
         |] )
       (fun () ->
         Eio_unix.sleep 2.;

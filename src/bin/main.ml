@@ -19,6 +19,12 @@ let json_headers s =
 
 let _current_api_version = "v1"
 
+let success ppf s =
+  Fmt.pf ppf "[%a]: %s" Fmt.(styled (`Fg `Green) string) "SUCCESS" s
+
+let failure ppf s =
+  Fmt.pf ppf "[%a]: %s" Fmt.(styled (`Fg `Red) string) "FAILURE" s
+
 let response_with_body body =
   ( Http.Response.make ~headers:(json_headers body) ~status:`OK (),
     Cohttp_eio.Body.Fixed body )
@@ -99,9 +105,9 @@ let v1_callback ~clock store ((req, body, _) : Cohttp_eio.Server.request) =
       | Error (`Msg m) -> send_error m
       | Ok data ->
           let status =
-            match Store.has_transaction_id store ~hash:data.hash with
-            | Some true -> `Complete
-            | Some false -> `Pending
+            match Store.get_transaction_id store ~hash:data.hash with
+            | Some (Some c) -> `Complete c
+            | Some None -> `Pending
             | None -> `Not_started
           in
           let body =
@@ -166,6 +172,12 @@ let content_address =
   Arg.required
   @@ Arg.opt Arg.(some string) None
   @@ Arg.info ~doc:"The hash of the content" ~docv:"HASH" [ "hash" ]
+
+let timestamp =
+  Arg.value
+  @@ Arg.opt Arg.(some string) None
+  @@ Arg.info ~doc:"The RFC3339 timestamp to use for a piece of content"
+       ~docv:"TIMESTAMP" [ "timestamp" ]
 
 let run_domain ssock handler =
   let on_error exn =
@@ -234,8 +246,9 @@ let complete_tx ~fs ~clock stdin =
     match
       Store.complete_transaction ~clock store ~hash ~tx:(Buffer.contents buf)
     with
-    | Ok _hash -> ()
-    | Error _ -> Fmt.epr "Failed to store!"
+    | Ok hash -> Fmt.pr "%a" success hash
+    | Error (`Msg m) -> Fmt.epr "%a" failure m
+    | Error `Not_pending -> Fmt.epr "%a" failure "Value is not pending!"
   in
   let doc =
     "Complete a transaction with a transaction ID from stdin, which will fail \
@@ -245,8 +258,9 @@ let complete_tx ~fs ~clock stdin =
   Cmd.v info @@ Term.(const complete $ logs $ directory $ content_address)
 
 let pp_status ppf = function
-  | Some true -> Fmt.pf ppf "%a" Fmt.(styled (`Fg `Green) string) "OK"
-  | Some false -> Fmt.pf ppf "%a" Fmt.(styled (`Fg `Yellow) string) "PENDING"
+  | Some (Some c) ->
+      Fmt.pf ppf "%a: %s" Fmt.(styled (`Fg `Green) string) "COMPLETE" c
+  | Some None -> Fmt.pf ppf "%a" Fmt.(styled (`Fg `Yellow) string) "PENDING"
   | None -> Fmt.pf ppf "%a" Fmt.(styled (`Fg `Red) string) "NO TX FOUND"
 
 let check_tx ~fs stdin =
@@ -255,7 +269,7 @@ let check_tx ~fs stdin =
     let store = init_store dir in
     let buf = Buffer.create 1028 in
     Eio.Flow.(copy stdin (buffer_sink buf));
-    let status = Store.has_transaction_id store ~hash:(Buffer.contents buf) in
+    let status = Store.get_transaction_id store ~hash:(Buffer.contents buf) in
     pp_status Fmt.stdout status
   in
   let doc = "For a particular hash, prints the status of the transaction." in
@@ -263,13 +277,15 @@ let check_tx ~fs stdin =
   Cmd.v info @@ Term.(const check $ logs $ directory)
 
 let dummy clock stdout =
-  let dummy () =
+  let dummy () timestamp =
     Eio.Flow.(
-      copy_string (Data.to_pretty_string Data.(dummy_details clock)) stdout)
+      copy_string
+        (Data.to_pretty_string Data.(dummy_details ?timestamp clock))
+        stdout)
   in
   let doc = "Write a dummy retirement JSON blob to stdout" in
   let info = Cmd.info "dummy" ~doc in
-  Cmd.v info @@ Term.(const dummy $ logs)
+  Cmd.v info @@ Term.(const dummy $ logs $ timestamp)
 
 let cmds env =
   [
@@ -288,5 +304,5 @@ let version =
 let () =
   Eio_main.run @@ fun env ->
   let doc = "an irmin http server for retirement data" in
-  let info = Cmd.info "retirement-db" ~doc ~version in
+  let info = Cmd.info "retirement" ~doc ~version in
   exit (Cmd.eval @@ Cmd.group info (cmds env))

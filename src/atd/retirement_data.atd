@@ -183,7 +183,7 @@ type string_response = {
     data : string;
 }
 
-type tx_status = [ Pending | Complete | Not_started ]
+type tx_status = [ Pending | Complete of string | Not_started ]
 
 type tx_status_response = {
     errors: string list;

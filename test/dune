@@ -5,19 +5,25 @@
  (libraries eio_main eio.mock alcotest retirement irmin.mem irmin-fs.unix))
 
 (mdx
+ (deps
+  (package retirement))
+ (package retirement)
  (files README.md))
 
-; (rule
-;  (deps %{project_root}/src/bin/main.exe)
-;  (targets dummy.out)
-;  (action
-;   (with-stdout-to
-;    dummy.out
-;    (run %{project_root}/src/bin/main.exe dummy))))
+(rule
+ (deps %{project_root}/src/bin/main.exe)
+ (targets dummy.out)
+ (action
+  (with-stdout-to
+   dummy.out
+   (run
+    %{project_root}/src/bin/main.exe
+    dummy
+    --timestamp=2022-12-09T21:27:07-00:00))))
 
-; (rule
-;  (alias runtest)
-;  (action
-;   (diff dummy.json dummy.out)))
+(rule
+ (alias runtest)
+ (action
+  (diff dummy.json dummy.out)))
 
 (data_only_dirs versions)

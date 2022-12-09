@@ -160,7 +160,6 @@ export type OnChain = {
 }
 
 export type BeginTxRequest = {
-  path: string[];
   value: T;
 }
 
@@ -700,14 +699,12 @@ export function readOnChain(x: any, context: any = x): OnChain {
 
 export function writeBeginTxRequest(x: BeginTxRequest, context: any = x): any {
   return {
-    'path': _atd_write_required_field('BeginTxRequest', 'path', _atd_write_array(_atd_write_string), x.path, x),
     'value': _atd_write_required_field('BeginTxRequest', 'value', writeT, x.value, x),
   };
 }
 
 export function readBeginTxRequest(x: any, context: any = x): BeginTxRequest {
   return {
-    path: _atd_read_required_field('BeginTxRequest', 'path', _atd_read_array(_atd_read_string), x['path'], x),
     value: _atd_read_required_field('BeginTxRequest', 'value', readT, x['value'], x),
   };
 }

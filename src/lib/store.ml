@@ -43,13 +43,12 @@ module Make (S : Data_store) = struct
 
   let begin_transaction ?msg t ~clock (c : Data.t) =
     let info () = info ?msg clock in
-    let year, month, _ = c.ts |> Data.ts_to_date in
     let h = S.Contents.hash c in
     if Option.is_some @@ S.Contents.of_hash t.transacted h then
       Error `Item_exists
     else
       let hash_string = Irmin.Type.to_string S.Hash.t h in
-      let path = [ string_of_int year; string_of_int month; hash_string ] in
+      let path = Data.get_path ~digest:hash_content c in
       let tx_b = S.of_branch t.transacted hash_string in
       Result.map
         (fun _ -> Irmin.Type.to_string S.Hash.t h)
@@ -92,11 +91,8 @@ module Make (S : Data_store) = struct
     match S.Contents.of_hash t.transacted h with
     | None -> None
     | Some c -> (
-        let year, month, _ = c.ts |> Data.ts_to_date in
-        match
-          S.find (S.main t.transacted)
-            [ string_of_int year; string_of_int month; hash ]
-        with
+        let path = Data.get_path ~digest:hash_content c in
+        match S.find (S.main t.transacted) path with
         | Some t -> Some t.tx_id
         | None -> Some None)
 

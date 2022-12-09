@@ -95,8 +95,11 @@ let dummy_offset =
       amount = 556789;
     }
 
-let dummy_details ?tx_id clock =
-  v ~timestamp:(current_ts clock) ?tx_id
+let dummy_details ?tx_id ?timestamp clock =
+  let timestamp =
+    match timestamp with Some t -> t | None -> current_ts clock
+  in
+  v ~timestamp ?tx_id
     { crsid = "abc123"; department = "CST"; name = "Alice" }
     (`Grant dummy_grant_details) dummy_travel_details dummy_offset
 

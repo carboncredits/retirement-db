@@ -51,7 +51,7 @@ val v :
 (** [v ?version details] constructs a new retirement data. If [version] is omitted, the 
     latest version will be used. *)
 
-val dummy_details : ?tx_id:string -> Eio.Time.clock -> t
+val dummy_details : ?tx_id:string -> ?timestamp:string -> Eio.Time.clock -> t
 (** Useful for tests and debugging. *)
 
 include Irmin.Contents.S with type t := t
