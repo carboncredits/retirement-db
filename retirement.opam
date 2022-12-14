@@ -22,8 +22,7 @@ depends: [
   "logs"
   "dune-build-info"
   "ppx_deriving_yojson"
-  "lwt"                {>= "5.3.0"}
-  "lwt_eio"            {>= "0.2"}
+  "mdx"                {with-test}
   "alcotest"           {with-test}
 ]
 synopsis: "Project metadata server"
