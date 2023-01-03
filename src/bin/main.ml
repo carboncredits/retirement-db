@@ -8,10 +8,6 @@ end
 
 module Store = Store.Make (I)
 
-module Remote = struct
-  let remote = None
-end
-
 let config root = Irmin_fs.config root
 
 let json_headers s =
@@ -21,7 +17,13 @@ let json_headers s =
       ("Content-Length", string_of_int @@ String.length s);
     ]
 
-let current_api_version = "v1"
+let _current_api_version = "v1"
+
+let success ppf s =
+  Fmt.pf ppf "[%a]: %s" Fmt.(styled (`Fg `Green) string) "SUCCESS" s
+
+let failure ppf s =
+  Fmt.pf ppf "[%a]: %s" Fmt.(styled (`Fg `Red) string) "FAILURE" s
 
 let response_with_body body =
   ( Http.Response.make ~headers:(json_headers body) ~status:`OK (),
@@ -44,70 +46,92 @@ let read_body req body f =
   try Result.map f data
   with _ -> Error (`Msg "Failed to parse the request arguments")
 
-let v1_callback ~clock repo main ((req, body, _) : Cohttp_eio.Server.request) =
+let v1_callback ~clock store ((req, body, _) : Cohttp_eio.Server.request) =
   let open Http in
   let open Cohttp_eio in
   match
     ( Request.meth req,
       Astring.String.cuts ~empty:false ~sep:"/" (Request.resource req) )
   with
-  | `POST, [ "add" ] -> (
-      match read_body req body Retirement_data.Json.set_request_of_string with
-      | Error (`Msg m) -> send_error m
-      | Ok data -> (
-          match Store.add_project ~clock main data.path data.value with
-          | Error e ->
-              let body =
-                Retirement_data.Json.string_of_string_response
-                  { errors = [ Store.add_error_to_string e ]; data = "Failure" }
-              in
-              response_with_body body
-          | Ok None ->
-              let body =
-                Retirement_data.Json.string_of_string_response
-                  { errors = [ "No commit was made" ]; data = "Failure" }
-              in
-              response_with_body body
-          | Ok (Some commit) ->
-              let body =
-                Rest.Response.set_to_json { errors = []; data = commit }
-              in
-              response_with_body body))
-  | `POST, [ "get"; "hash" ] -> (
+  | `POST, [ "tx"; "begin" ] -> (
       match
-        read_body req body Retirement_data.Json.get_hash_request_of_string
+        read_body req body Retirement_data.Json.begin_tx_request_of_string
       with
       | Error (`Msg m) -> send_error m
       | Ok data -> (
-          match Store.of_commit repo data.commit with
-          | Error (`Msg m) -> send_error m
-          | Ok store ->
-              let project = Store.get_project store data.path in
-              let hash =
-                I.Contents.hash project |> Irmin.Type.to_string I.Hash.t
+          match Store.begin_transaction ~clock store data.value with
+          | Error e ->
+              let body =
+                Retirement_data.Json.string_of_string_response
+                  { errors = [ Store.tx_error_to_string e ]; data = "Failure" }
               in
-              let response =
-                Rest.Response.get_hash_to_json { errors = []; data = hash }
+              response_with_body body
+          | Ok content_hash ->
+              let body =
+                Rest.Response.begin_tx_to_json
+                  { errors = []; data = content_hash }
               in
-              response_with_body response))
+              response_with_body body))
+  | `POST, [ "tx"; "complete" ] -> (
+      match
+        read_body req body Retirement_data.Json.complete_tx_request_of_string
+      with
+      | Error (`Msg m) -> send_error m
+      | Ok data -> (
+          match
+            Store.complete_transaction ~clock store ~hash:data.hash
+              ~tx:data.tx_id
+          with
+          | Error e ->
+              let err =
+                match e with `Msg m -> m | `Not_pending -> "Not pending"
+              in
+              let body =
+                Retirement_data.Json.string_of_string_response
+                  { errors = [ err ]; data = "Failure" }
+              in
+              response_with_body body
+          | Ok content_hash ->
+              let body =
+                Rest.Response.begin_tx_to_json
+                  { errors = []; data = content_hash }
+              in
+              response_with_body body))
+  | `POST, [ "tx"; "status" ] -> (
+      match
+        read_body req body
+          Retirement_data.Json.check_tx_status_request_of_string
+      with
+      | Error (`Msg m) -> send_error m
+      | Ok data ->
+          let status =
+            match Store.get_transaction_id store ~hash:data.hash with
+            | Some (Some c) -> `Complete c
+            | Some None -> `Pending
+            | None -> `Not_started
+          in
+          let body =
+            Rest.Response.check_tx_status_to_json { errors = []; data = status }
+          in
+          response_with_body body)
   | `POST, [ "get"; "content" ] -> (
       match
         read_body req body Retirement_data.Json.get_content_request_of_string
       with
       | Error (`Msg m) -> send_error m
       | Ok data -> (
-          match Store.get_project_by_hash repo data.hash with
-          | Error (`Msg m) -> send_error m
-          | Ok None -> send_error ("No project found at hash " ^ data.hash)
-          | Ok (Some project) ->
+          match Store.find store ~hash:data.hash with
+          | None -> send_error ("No project found at hash " ^ data.hash)
+          | Some contents ->
               let response =
                 Rest.Response.get_content_to_json
-                  { errors = []; data = project }
+                  { errors = []; data = contents }
               in
               response_with_body response))
   | `GET, [ "json"; year; month ] ->
       let items =
-        Store.get_all main [ year; month ] |> Data.list_to_json_string
+        Store.lookup_all_transacted store [ year; month ]
+        |> Data.list_to_json_string
       in
       ( Http.Response.make ~headers:(json_headers items) ~status:`OK (),
         Body.Fixed items )
@@ -116,11 +140,11 @@ let v1_callback ~clock repo main ((req, body, _) : Cohttp_eio.Server.request) =
           f "Not found %a %a" Fmt.(list string) s Request.pp req);
       Server.not_found_response
 
+let init_store dir = Store.v (config dir)
+
 let server ~clock dir =
-  let config = config dir in
-  let repo = Store.repository config in
-  let main = Store.of_branch repo in
-  v1_callback ~clock repo main
+  let store = init_store dir in
+  v1_callback ~clock store
 
 open Cmdliner
 
@@ -140,15 +164,20 @@ let directory =
   @@ Arg.info ~doc:"The directory on the filesystem to use for the repository"
        ~docv:"DIRECTORY" [ "directory" ]
 
-let path =
-  Arg.required
-  @@ Arg.opt Arg.(some string) None
-  @@ Arg.info ~doc:"The / segmented path for the value to be stored at"
-       ~docv:"PATH" [ "path" ]
-
 let port =
   Arg.value @@ Arg.opt Arg.int 8080
   @@ Arg.info ~doc:"The port to run the server on" ~docv:"PORT" [ "port" ]
+
+let content_address =
+  Arg.required
+  @@ Arg.opt Arg.(some string) None
+  @@ Arg.info ~doc:"The hash of the content" ~docv:"HASH" [ "hash" ]
+
+let timestamp =
+  Arg.value
+  @@ Arg.opt Arg.(some string) None
+  @@ Arg.info ~doc:"The RFC3339 timestamp to use for a piece of content"
+       ~docv:"TIMESTAMP" [ "timestamp" ]
 
 let run_domain ssock handler =
   let on_error exn =
@@ -189,47 +218,82 @@ let serve env =
   let info = Cmd.info "serve" ~doc in
   Cmd.v info @@ Term.(const serve $ logs $ directory $ const "::" $ port)
 
-let add_project ~fs ~clock stdin =
-  let add () dir path =
+let begin_tx ~fs ~clock stdin =
+  let add () dir =
     Irmin_fs.run fs @@ fun () ->
-    let repo = Store.repository (config dir) in
-    let main = Store.of_branch repo in
+    let store = init_store dir in
     let buf = Buffer.create 1028 in
     let () = Eio.Flow.(copy stdin (buffer_sink buf)) in
-    let segs = String.split_on_char '/' path in
-    match Store.add_project_json ~clock main segs (Buffer.contents buf) with
-    | Ok _hash -> ()
+    let contents =
+      match Data.of_string @@ Buffer.contents buf with
+      | Ok v -> v
+      | Error (`Msg s) -> failwith s
+    in
+    match Store.begin_transaction ~clock store contents with
+    | Ok hash -> Fmt.pr "%s" hash
     | Error _ -> Fmt.epr "Failed to store!"
   in
-  let doc = "Add a project using JSON read from stdin" in
-  let info = Cmd.info "add" ~doc in
-  Cmd.v info @@ Term.(const add $ logs $ directory $ path)
+  let doc = "Begin a transaction for a blob of data" in
+  let info = Cmd.info "begin-tx" ~doc in
+  Cmd.v info @@ Term.(const add $ logs $ directory)
 
-let dummy_details =
-  Retirement_data.Types.
-    {
-      flight_details = [];
-      train_details = [];
-      taxi_details = [];
-      additional_details = [];
-      primary_reason = `Conference;
-      secondary_reason = None;
-      reason_text = "Some reason for travelling!";
-    }
+let complete_tx ~fs ~clock stdin =
+  let complete () dir hash =
+    Irmin_fs.run fs @@ fun () ->
+    let store = init_store dir in
+    let buf = Buffer.create 1028 in
+    let () = Eio.Flow.(copy stdin (buffer_sink buf)) in
+    match
+      Store.complete_transaction ~clock store ~hash ~tx:(Buffer.contents buf)
+    with
+    | Ok hash -> Fmt.pr "%a" success hash
+    | Error (`Msg m) -> Fmt.epr "%a" failure m
+    | Error `Not_pending -> Fmt.epr "%a" failure "Value is not pending!"
+  in
+  let doc =
+    "Complete a transaction with a transaction ID from stdin, which will fail \
+     if the blob is not already pending by beginning the transaction."
+  in
+  let info = Cmd.info "complete-tx" ~doc in
+  Cmd.v info @@ Term.(const complete $ logs $ directory $ content_address)
 
-let dummy stdout =
-  let dummy () =
-    Eio.Flow.(copy_string (Data.to_pretty_string Data.dummy_details) stdout)
+let pp_status ppf = function
+  | Some (Some c) ->
+      Fmt.pf ppf "%a: %s" Fmt.(styled (`Fg `Green) string) "COMPLETE" c
+  | Some None -> Fmt.pf ppf "%a" Fmt.(styled (`Fg `Yellow) string) "PENDING"
+  | None -> Fmt.pf ppf "%a" Fmt.(styled (`Fg `Red) string) "NO TX FOUND"
+
+let check_tx ~fs stdin =
+  let check () dir =
+    Irmin_fs.run fs @@ fun () ->
+    let store = init_store dir in
+    let buf = Buffer.create 1028 in
+    Eio.Flow.(copy stdin (buffer_sink buf));
+    let status = Store.get_transaction_id store ~hash:(Buffer.contents buf) in
+    pp_status Fmt.stdout status
+  in
+  let doc = "For a particular hash, prints the status of the transaction." in
+  let info = Cmd.info "check-tx" ~doc in
+  Cmd.v info @@ Term.(const check $ logs $ directory)
+
+let dummy clock stdout =
+  let dummy () timestamp =
+    Eio.Flow.(
+      copy_string
+        (Data.to_pretty_string Data.(dummy_details ?timestamp clock))
+        stdout)
   in
   let doc = "Write a dummy retirement JSON blob to stdout" in
   let info = Cmd.info "dummy" ~doc in
-  Cmd.v info @@ Term.(const dummy $ logs)
+  Cmd.v info @@ Term.(const dummy $ logs $ timestamp)
 
 let cmds env =
   [
     serve env;
-    add_project ~fs:env#fs ~clock:env#clock env#stdin;
-    dummy env#stdout;
+    begin_tx ~fs:env#fs ~clock:env#clock env#stdin;
+    complete_tx ~fs:env#fs ~clock:env#clock env#stdin;
+    check_tx ~fs:env#fs env#stdin;
+    dummy env#clock env#stdout;
   ]
 
 let version =
@@ -240,5 +304,5 @@ let version =
 let () =
   Eio_main.run @@ fun env ->
   let doc = "an irmin http server for retirement data" in
-  let info = Cmd.info "retirement-db" ~doc ~version in
+  let info = Cmd.info "retirement" ~doc ~version in
   exit (Cmd.eval @@ Cmd.group info (cmds env))

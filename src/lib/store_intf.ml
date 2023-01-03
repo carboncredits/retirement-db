@@ -4,68 +4,75 @@ module type Data_store =
      and type Schema.Branch.t = string
      and type Schema.Path.t = string list
 
+(* A content-addressed, transaction store. *)
 module type S = sig
-  module I : Data_store
-  (** The underlying Irmin store *)
+  type t
+  (** A store *)
 
-  module Sync : Irmin.Sync.S with type db = I.t
-  (** Synchronisation functions *)
+  type contents
+  (** The type of the contents we're storing. *)
 
-  val repository : Irmin.config -> I.repo
-  (** Get's the underlying Irmin repository *)
+  type path = string list
+  (** Keys for the contents, which should be unique. *)
 
-  val of_commit : I.repo -> string -> (I.t, [ `Msg of string ]) result
-  (** Get's the store associated with a particular hash commit for
-        a particular repository. *)
+  val v : Irmin.config -> t
+  (** Construct a new transaction store *)
 
-  val of_branch : ?branch:I.branch -> I.repo -> I.t
-  (** Get's the store associated with a particular branch for
-        a particular repository. *)
+  val hash_content : contents -> string
+  (** Hashes the contents and returns the hash as a hex string. *)
 
-  type add_error = [ `Msg of string | I.write_error ]
+  type tx_error =
+    [ `Msg of string | `Key_not_unique | `Item_exists | `Path_exists ]
 
-  val add_error_to_string : add_error -> string
+  val tx_error_to_string : tx_error -> string
 
-  val add_project_json :
+  val begin_transaction :
     ?msg:string ->
+    t ->
     clock:Eio.Time.clock ->
-    I.t ->
-    I.path ->
-    string ->
-    (string option, add_error) result
-  (** Add a project from raw JSON. This will try to parse the JSON into a project
-      and may fail to do so, otherwise the failure is to do with persisting the
-      data to the store.
-      
-      Returns the commit hash if successful. *)
+    contents ->
+    (string, tx_error) result
+  (** [begin_transaction t c] starts a transaction for contents [c] and returns
+      the hash of the contents if successful. *)
 
-  val add_project :
+  val complete_transaction :
     ?msg:string ->
+    t ->
     clock:Eio.Time.clock ->
-    I.t ->
-    I.path ->
-    Data.t ->
-    (string option, add_error) result
-  (** Like {! add_project_json} but using a {! Project.t} instead. These can be
-        built with {! Project.v}. Returns the commit hash if successful. *)
+    hash:string ->
+    tx:string ->
+    (string, [ `Msg of string | `Not_pending ]) result
+  (** [complete_transaction t ~hash] completes a transaction for [hash] returning the commit hash. *)
 
-  val get_project : I.t -> I.path -> Data.t
-  (** [get_project store path] gets the project at [path] in [store]. This will raise
-      [Not_found] if there is no value at [path]. *)
+  val has_transaction_id : t -> hash:string -> bool option
+  (** [has_transaction t ~hash] returns whether or not a [hash] has been successfully
+      transacted. It may return [None] is [hash] simply doesn't exist. *)
 
-  val get_project_by_hash :
-    I.repo -> string -> (Data.t option, [ `Msg of string ]) result
-  (** [get_project_by_hash] is a content-addressed lookup. *)
+  val get_transaction_id : t -> hash:string -> string option option
+  (** Same idea as {! get_transaction_id}. [Some (Some id)], [Some None] (pending), [None]. *)
 
-  val get_all : I.t -> I.path -> Data.t list
-  (** [get_all store path] finds all of the stored data items at [path]. *)
+  val is_pending : t -> hash:string -> bool
+  (** Similar to {! has_transaction} but checks if a [hash] is pending. *)
 
-  val find_project : I.t -> I.path -> Data.t option
-  (** Like {! get_project} only will wrap [Not_found] into an option. *)
+  val find : t -> hash:string -> contents option
+  (** Content-addressed lookup in the store. Doesn't mean it has been transacted. *)
+
+  val lookup_transacted : t -> path -> contents option
+  (** Lookup by path in the items that have successfully been transacted. *)
+
+  val lookup_all_transacted : t -> path -> contents list
+  (** Find all the contents at a path that have been transacted. *)
+
+  module Private : sig
+    val close : t -> unit
+  end
 end
 
-module type Make = functor (Arg : Data_store) -> S
+module type Make = functor (Arg : Data_store) ->
+  S with type contents = Arg.contents and type path = Arg.path
 
 module type Intf = sig
+  module type S = S
+
   module Make : Make
 end

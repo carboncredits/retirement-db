@@ -133,10 +133,12 @@ type offset <ocaml attr="deriving irmin"> = {
 
 type t <ocaml attr="deriving irmin"> = {
     version : version;
+    ts : string;
     details : travel_details;
     id : cambridge_id;
     finance_kind <json name="financeKind">: finance_kind;
     offset : offset;
+    ?tx_id : string option;
     ?cost_centre_details <json name="costCentreDetails">: cost_centre_details option;
     ?grant_details <json name="grantDetails">: grant_details option;
 } <ocaml valid="fun x -> match x.finance_kind with `Grant -> Option.is_some x.grant_details | `CostCentre -> Option.is_some x.cost_centre_details">
@@ -153,9 +155,17 @@ type on_chain = {
 }
 
 (* HTTP REST API *)
-type set_request = {
-    path : string list;
+type begin_tx_request = {
     value : t;
+}
+
+type complete_tx_request = {
+    hash : string;
+    tx_id : string;
+}
+
+type check_tx_status_request = {
+    hash : string
 }
 
 type get_hash_request = {
@@ -171,6 +181,13 @@ type get_content_request = {
 type string_response = {
     errors : string list;
     data : string;
+}
+
+type tx_status = [ Pending | Complete of string | Not_started ]
+
+type tx_status_response = {
+    errors: string list;
+    data : tx_status
 }
 
 type t_response = {
