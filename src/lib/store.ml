@@ -18,13 +18,18 @@ module Make (S : Data_store) = struct
     Irmin.Type.to_string S.Hash.t h
 
   type tx_error =
-    [ `Msg of string | `Key_not_unique | `Item_exists | `Path_exists ]
+    [ `Msg of string
+    | `Key_not_unique
+    | `Item_exists
+    | `Path_exists
+    | `Item_does_not_exist ]
 
   let tx_error_to_string = function
     | `Msg s -> s
-    | `Key_not_unique -> "Key not unique"
-    | `Item_exists -> "Item exists"
-    | `Path_exists -> "Path exists"
+    | `Key_not_unique -> "Key not unique!"
+    | `Item_exists -> "Item exists!"
+    | `Item_does_not_exist -> "Item doesn't exist!"
+    | `Path_exists -> "Path exists!"
 
   let info ?msg clock = S.Info.v ?message:msg (Time.now clock |> Int64.of_float)
 
@@ -33,10 +38,7 @@ module Make (S : Data_store) = struct
     | Ok c -> Ok c
     | Error (`Test_was (Some _)) -> Error `Item_exists
     | Error (`Conflict _) -> Error `Path_exists
-    | Error (`Test_was None) ->
-        failwith
-          ("Test was null: "
-          ^ Fmt.str "%a" (Fmt.option (Irmin.Type.pp S.contents_t)) test)
+    | Error (`Test_was None) -> Error `Item_does_not_exist
     | Error e ->
         ignore (failwith (Option.is_none test |> string_of_bool));
         Error (`Msg (Irmin.Type.to_string S.write_error_t e))
@@ -75,6 +77,7 @@ module Make (S : Data_store) = struct
               [ string_of_int year; string_of_int month; hash ]
           with
           | Error `Item_exists -> Error (`Msg "Item exists")
+          | Error `Item_does_not_exist -> Error (`Msg "Item does not exists")
           | Error `Path_exists -> Error (`Msg "Path exists")
           | Error (`Msg _) as e -> e
           | Ok None -> Error (`Msg ("Store didn't update " ^ hash))

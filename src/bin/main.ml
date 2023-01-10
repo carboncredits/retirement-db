@@ -181,12 +181,12 @@ let timestamp =
   @@ Arg.info ~doc:"The RFC3339 timestamp to use for a piece of content"
        ~docv:"TIMESTAMP" [ "timestamp" ]
 
-let run_domain ssock handler =
+let run_domain env ssock handler =
   let on_error exn =
     Printf.fprintf stderr "Error handling connection: %s\n%!"
       (Printexc.to_string exn)
   in
-  let handler = Cohttp_eio.Server.connection_handler handler in
+  let handler = Cohttp_eio.Server.connection_handler handler env in
   Switch.run (fun sw ->
       let rec loop () =
         Eio.Net.accept_fork ~sw ssock ~on_error handler;
@@ -202,7 +202,7 @@ let run ?(socket_backlog = 128) ~port env handler =
       (`Tcp (Eio.Net.Ipaddr.V4.any, port))
   in
   (* Irmin is not domain-safe! So only 1 domain!!!! *)
-  run_domain ssock handler
+  run_domain env ssock handler
 
 let serve' ~env ~dir ~src:_ ~port () =
   Irmin_fs.run env#fs @@ fun () ->
