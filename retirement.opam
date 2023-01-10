@@ -32,5 +32,6 @@ pin-depends:[
   [ "irmin.dev" "git+https://github.com/patricoferris/irmin#ecfabf46357d19316f969bf8b8c578355b322c55" ]
   [ "irmin-fs.dev" "git+https://github.com/patricoferris/irmin#ecfabf46357d19316f969bf8b8c578355b322c55" ]
   # Eio.0.7 Support
-  [ "cohttp-eio.dev" "git+https://github.com/mirage/ocaml-cohttp#ec82f50f261b53d73839c22b6fd600273489503d"]
+  [ "http.dev" "git+https://github.com/mirage/ocaml-cohttp#ec82f50f261b53d73839c22b6fd600273489503d" ]
+  [ "cohttp-eio.dev" "git+https://github.com/mirage/ocaml-cohttp#ec82f50f261b53d73839c22b6fd600273489503d" ]
 ]
