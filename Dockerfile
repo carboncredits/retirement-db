@@ -1,6 +1,6 @@
-FROM ocaml/opam:alpine-3.15-ocaml-5.0 as build
+FROM ocaml/opam:alpine-3.16-ocaml-5.0 as build
 RUN sudo ln -f /usr/bin/opam-2.1 /usr/bin/opam
-RUN cd ~/opam-repository && git pull origin -q master && git reset --hard 2b82c83694d8f1db63e504823646ffcb51562f75 && opam update
+RUN cd ~/opam-repository && git pull origin -q master && git reset --hard 0e970838e3e70808f882954d61828acc4ce30b06 && opam update
 RUN opam repo add alpha https://github.com/kit-ty-kate/opam-alpha-repository.git
 RUN sudo apk add gmp-dev libffi-dev linux-headers
 COPY --chown=opam retirement.opam retirement-data.opam /src/

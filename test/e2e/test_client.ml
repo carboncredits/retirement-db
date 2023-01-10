@@ -19,14 +19,14 @@ let get_json ?headers ~net http (uri, resource) =
   let port = Uri.port uri |> Option.value ~default:8080 in
   let addr = `Tcp (Eio_unix.Ipaddr.of_unix ip, port) in
   Switch.run @@ fun sw ->
-  let conn = Net.connect ~sw net addr in
+  let conn = Net.connect ~sw net#net addr in
   let resp = http ?headers ~conn ("http://" ^ host) port resource in
   Client.read_fixed resp
 
 let req_to_json ~net response ~host ~path body =
   let open Cohttp_eio in
-  let http ?headers ~conn host port path =
-    Client.post ~conn ~body:(Body.Fixed body) ?headers (host, Some port) path
+  let http ?headers ~conn host _port path =
+    Client.post ~conn ~body:(Body.Fixed body) ?headers net path ~host
   in
   let body = get_json ~headers ~net http (host, path) in
   response body
@@ -177,6 +177,5 @@ let () =
         f ())
   in
   Eio_main.run @@ fun env ->
-  let net = Eio.Stdenv.net env in
   let clock = Eio.Stdenv.clock env in
-  run (client clock net)
+  run (client clock env)

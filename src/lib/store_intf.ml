@@ -22,7 +22,11 @@ module type S = sig
   (** Hashes the contents and returns the hash as a hex string. *)
 
   type tx_error =
-    [ `Msg of string | `Key_not_unique | `Item_exists | `Path_exists ]
+    [ `Msg of string
+    | `Key_not_unique
+    | `Item_exists
+    | `Path_exists
+    | `Item_does_not_exist ]
 
   val tx_error_to_string : tx_error -> string
 
