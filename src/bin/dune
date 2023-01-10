@@ -11,4 +11,5 @@
   irmin-fs.unix
   multihash-digestif
   retirement
+  logs.threaded
   dune-build-info))
