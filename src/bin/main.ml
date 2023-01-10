@@ -2,6 +2,8 @@ open Retirement
 open Eio
 module Md = Multihash_digestif
 
+let () = Domain.before_first_spawn (fun () -> Logs_threaded.enable ())
+
 module I = struct
   include Irmin_fs_unix.Make (Retirement.Schema)
 end
