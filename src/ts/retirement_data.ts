@@ -188,7 +188,7 @@ export type StringResponse = {
 
 export type TxStatus =
 | { kind: 'Pending' }
-| { kind: 'Complete' }
+| { kind: 'Complete'; value: string }
 | { kind: 'Not_started' }
 
 export type TxStatusResponse = {
@@ -780,23 +780,33 @@ export function writeTxStatus(x: TxStatus, context: any = x): any {
     case 'Pending':
       return 'Pending'
     case 'Complete':
-      return 'Complete'
+      return ['Complete', _atd_write_string(x.value, x)]
     case 'Not_started':
       return 'Not_started'
   }
 }
 
 export function readTxStatus(x: any, context: any = x): TxStatus {
-  switch (x) {
-    case 'Pending':
-      return { kind: 'Pending' }
-    case 'Complete':
-      return { kind: 'Complete' }
-    case 'Not_started':
-      return { kind: 'Not_started' }
-    default:
-      _atd_bad_json('TxStatus', x, context)
-      throw new Error('impossible')
+  if (typeof x === 'string') {
+    switch (x) {
+      case 'Pending':
+        return { kind: 'Pending' }
+      case 'Not_started':
+        return { kind: 'Not_started' }
+      default:
+        _atd_bad_json('TxStatus', x, context)
+        throw new Error('impossible')
+    }
+  }
+  else {
+    _atd_check_json_tuple(2, x, context)
+    switch (x[0]) {
+      case 'Complete':
+        return { kind: 'Complete', value: _atd_read_string(x[1], x) }
+      default:
+        _atd_bad_json('TxStatus', x, context)
+        throw new Error('impossible')
+    }
   }
 }
 
