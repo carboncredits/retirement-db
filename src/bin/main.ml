@@ -130,6 +130,26 @@ let v1_callback ~clock store ((req, body, _) : Cohttp_eio.Server.request) =
                   { errors = []; data = contents }
               in
               response_with_body response))
+  | `POST, [ "get"; "bookers" ] -> (
+      match
+        read_body req body Retirement_data.Json.get_bookers_request_of_string
+      with
+      | Error (`Msg m) -> send_error m
+      | Ok data ->
+          if data.months < 1 then send_error "Months should be greater than 0!"
+          else
+            let current_year, current_month, _ =
+              Ptime.of_float_s (Unix.gettimeofday ())
+              |> Option.get |> Ptime.to_date
+            in
+            let contents =
+              Store.lookup_bookers_transacted store ~booker:data.booker
+                ~months:data.months ~current_year ~current_month
+            in
+            let response =
+              Rest.Response.get_bookers_to_json { errors = []; data = contents }
+            in
+            response_with_body response)
   | `GET, [ "json"; year; month ] ->
       let items =
         Store.lookup_all_transacted store [ year; month ]
@@ -275,10 +295,10 @@ let check_tx ~fs stdin =
   Cmd.v info @@ Term.(const check $ logs $ directory)
 
 let dummy clock stdout =
-  let dummy () timestamp =
+  let dummy () ts =
     Eio.Flow.(
       copy_string
-        (Data.to_pretty_string Data.(dummy_details ?timestamp clock))
+        (Data.to_pretty_string Data.(dummy_details ?timestamp:ts clock))
         stdout)
   in
   let doc = "Write a dummy retirement JSON blob to stdout" in

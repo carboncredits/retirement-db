@@ -15,6 +15,37 @@ let projects =
   let v2 = Data.dummy_details (mock_clock :> Eio.Time.clock) in
   [ v1; v2 ]
 
+let lookup_projects =
+  Eio_mock.Clock.set_time mock_clock 1.;
+  let v1 =
+    {
+      (Data.dummy_details (mock_clock :> Eio.Time.clock)) with
+      booker_crsid = "abc";
+    }
+  in
+  Eio_mock.Clock.set_time mock_clock 2.;
+  let v2 =
+    {
+      (Data.dummy_details (mock_clock :> Eio.Time.clock)) with
+      booker_crsid = "abc";
+    }
+  in
+  Eio_mock.Clock.set_time mock_clock 3.;
+  let v3 =
+    {
+      (Data.dummy_details (mock_clock :> Eio.Time.clock)) with
+      booker_crsid = "abc";
+    }
+  in
+  Eio_mock.Clock.set_time mock_clock 4.;
+  let v4 =
+    {
+      (Data.dummy_details (mock_clock :> Eio.Time.clock)) with
+      booker_crsid = "def";
+    }
+  in
+  [ v1; v2; v3; v4 ]
+
 let tx =
   let txid = ref 0 in
   fun () ->
@@ -83,6 +114,33 @@ let test_get_all ~clock () =
   let projs = Store.lookup_all_transacted main [ "1970"; "1" ] in
   Alcotest.(check (list project)) "same projects" with_txid projs
 
+let test_lookup ~clock () =
+  with_store ~clock ~empty:true ~name:"test-lookup" @@ fun main ->
+  add_items ~clock main lookup_projects;
+  let current_year, current_month, _ =
+    Ptime.of_float_s (Unix.gettimeofday ()) |> Option.get |> Ptime.to_date
+  in
+  let projects =
+    List.filter
+      (fun v -> v.Retirement_data.Types.booker_crsid = "abc")
+      lookup_projects
+  in
+  let with_txid =
+    List.mapi
+      (fun i (v : Data.t) -> { v with tx_id = Some (string_of_int (i + 5)) })
+      projects
+  in
+  let none =
+    Store.lookup_bookers_transacted ~booker:"abc" ~current_year ~current_month
+      ~months:1 main
+  in
+  Alcotest.(check (list project)) "no projects" [] none;
+  let projs =
+    Store.lookup_bookers_transacted ~booker:"abc" ~current_year:1970
+      ~current_month:1 ~months:1 main
+  in
+  Alcotest.(check (list project)) "same projects" with_txid projs
+
 let () =
   let test_case s fn = Alcotest.test_case s `Quick fn in
   Eio_main.run @@ fun env ->
@@ -97,6 +155,7 @@ let () =
         [
           test_case "read" (test_read ~clock);
           test_case "get-all" (test_get_all ~clock);
+          test_case "lookup" (test_lookup ~clock);
         ] );
       ("low-level", test_backwards_compat dir);
     ]

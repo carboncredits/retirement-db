@@ -182,6 +182,11 @@ export type GetContentRequest = {
   hash: string;
 }
 
+export type GetBookersRequest = {
+  booker: string;
+  months: Int;
+}
+
 export type StringResponse = {
   errors: string[];
   data: string;
@@ -200,6 +205,11 @@ export type TxStatusResponse = {
 export type TResponse = {
   errors: string[];
   data: T;
+}
+
+export type TListResponse = {
+  errors: string[];
+  data: T[];
 }
 
 export function writeVersion(x: Version, context: any = x): any {
@@ -764,6 +774,20 @@ export function readGetContentRequest(x: any, context: any = x): GetContentReque
   };
 }
 
+export function writeGetBookersRequest(x: GetBookersRequest, context: any = x): any {
+  return {
+    'booker': _atd_write_required_field('GetBookersRequest', 'booker', _atd_write_string, x.booker, x),
+    'months': _atd_write_required_field('GetBookersRequest', 'months', _atd_write_int, x.months, x),
+  };
+}
+
+export function readGetBookersRequest(x: any, context: any = x): GetBookersRequest {
+  return {
+    booker: _atd_read_required_field('GetBookersRequest', 'booker', _atd_read_string, x['booker'], x),
+    months: _atd_read_required_field('GetBookersRequest', 'months', _atd_read_int, x['months'], x),
+  };
+}
+
 export function writeStringResponse(x: StringResponse, context: any = x): any {
   return {
     'errors': _atd_write_required_field('StringResponse', 'errors', _atd_write_array(_atd_write_string), x.errors, x),
@@ -838,6 +862,20 @@ export function readTResponse(x: any, context: any = x): TResponse {
   return {
     errors: _atd_read_required_field('TResponse', 'errors', _atd_read_array(_atd_read_string), x['errors'], x),
     data: _atd_read_required_field('TResponse', 'data', readT, x['data'], x),
+  };
+}
+
+export function writeTListResponse(x: TListResponse, context: any = x): any {
+  return {
+    'errors': _atd_write_required_field('TListResponse', 'errors', _atd_write_array(_atd_write_string), x.errors, x),
+    'data': _atd_write_required_field('TListResponse', 'data', _atd_write_array(writeT), x.data, x),
+  };
+}
+
+export function readTListResponse(x: any, context: any = x): TListResponse {
+  return {
+    errors: _atd_read_required_field('TListResponse', 'errors', _atd_read_array(_atd_read_string), x['errors'], x),
+    data: _atd_read_required_field('TListResponse', 'data', _atd_read_array(readT), x['data'], x),
   };
 }
 

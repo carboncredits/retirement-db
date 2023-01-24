@@ -67,6 +67,16 @@ module type S = sig
   val lookup_all_transacted : t -> path -> contents list
   (** Find all the contents at a path that have been transacted. *)
 
+  val lookup_bookers_transacted :
+    booker:string ->
+    months:int ->
+    current_year:int ->
+    current_month:int ->
+    t ->
+    contents list
+  (** [lookup_booker_transacted] will do what {! lookup_all_transacted} does except filter by the
+      person who did the booking and can span multiple months. *)
+
   module Private : sig
     val close : t -> unit
   end
