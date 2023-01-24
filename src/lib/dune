@@ -3,4 +3,4 @@
  (public_name retirement)
  (libraries irmin eio ptime multihash-digestif retirement-data)
  (preprocess
-  (pps ppx_irmin ppx_deriving_yojson)))
+  (pps ppx_irmin ppx_deriving_yojson ppx_fields_conv ppx_csv_conv)))

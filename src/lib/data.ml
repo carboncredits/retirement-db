@@ -40,6 +40,78 @@ let get_path ~digest (t : t) =
   let year, month, _ = ts_to_date t.ts in
   [ string_of_int year; string_of_int month; digest t ]
 
+module Flight_csv = struct
+  (* A subset of the data that is CSV-able *)
+  module Line = struct
+    type t = {
+      booker_crsid : string;
+      business_traveller_crsid : string;
+      departure : string;
+      arrival : string;
+      passenger_count : int;
+      flight_count : int;
+      aircraft_type : string;
+      ts : string;
+      tx_id : string;
+    }
+    [@@deriving fields, csv]
+  end
+
+  let to_csv (v : Retirement_data.Types.t) =
+    let flights = v.details.flight_details in
+    let line (t : J.t) (v : J.flight_details) =
+      match t.tx_id with
+      | Some tx_id ->
+          Some
+            {
+              Line.booker_crsid = t.booker_crsid;
+              business_traveller_crsid = t.business_traveller.crsid;
+              departure = v.departure.iata_code;
+              arrival = v.arrival.iata_code;
+              passenger_count = v.passenger_count;
+              flight_count = v.flight_count;
+              aircraft_type = v.aircraft_type;
+              ts = t.ts;
+              tx_id;
+            }
+      | None -> None
+    in
+    List.filter_map (line v) flights
+end
+
+module Finance_csv = struct
+  module Line = struct
+    type t = {
+      booker_crsid : string;
+      business_traveller_crsid : string;
+      total_flights : int;
+      co2e_amount : int;
+      ts : string;
+      tx_id : string;
+    }
+    [@@deriving fields, csv]
+  end
+
+  let to_csv (v : Retirement_data.Types.t) =
+    let total_flights =
+      List.fold_left
+        (fun acc (v : J.flight_details) -> acc + v.flight_count)
+        0 v.details.flight_details
+    in
+    match v.tx_id with
+    | Some tx_id ->
+        Some
+          {
+            Line.booker_crsid = v.booker_crsid;
+            business_traveller_crsid = v.business_traveller.crsid;
+            total_flights;
+            co2e_amount = v.offset.amount;
+            ts = v.ts;
+            tx_id;
+          }
+    | None -> None
+end
+
 let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp booker_crsid
     business_traveller finance details offset =
   match finance with

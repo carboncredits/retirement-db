@@ -1,0 +1,10 @@
+booker_crsid,business_traveller_crsid,departure,arrival,passenger_count,flight_count,aircraft_type,ts,tx_id
+xyz123,abc123,LHR,BFS,2,2,A320,1970-01-01T00:00:01-00:00,1
+xyz123,abc123,LHR,BFS,2,2,A320,1970-01-01T00:00:01-00:00,1
+xyz123,abc123,LHR,BFS,2,2,A320,1970-01-01T00:00:01-00:00,1
+pf341,abc123,LHR,BFS,2,2,A320,1970-01-01T00:00:02-00:00,2
+
+
+booker_crsid,business_traveller_crsid,total_flights,co2e_amount,ts,tx_id
+xyz123,abc123,6,556789,1970-01-01T00:00:01-00:00,1
+pf341,abc123,2,556789,1970-01-01T00:00:02-00:00,2
