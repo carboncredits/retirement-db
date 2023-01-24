@@ -125,7 +125,30 @@ module Make (S : Data_store) = struct
     in
     List.fold_left
       (fun acc -> function _, `Contents (c, _) -> c :: acc | _ -> acc)
-      [] items |> List.rev
+      [] items
+    |> List.stable_sort (fun a b ->
+           Ptime.compare (Data.timestamp a) (Data.timestamp b))
+
+  let previous_year_months ~months current_year current_month =
+    let months =
+      List.init months (fun i ->
+          let d = current_month - 1 - i in
+          if d < 0 then (current_year + ((d / 12) - 1), 12 + (d mod 12))
+          else (current_year, d))
+    in
+    List.map
+      (fun (year, month) -> [ string_of_int year; string_of_int (month + 1) ])
+      months
+
+  let lookup_bookers_transacted ~booker ~months ~current_year ~current_month t =
+    let months = previous_year_months ~months current_year current_month in
+    Eio.traceln "%a" Fmt.(list (list string)) months;
+    let vs = List.map (lookup_all_transacted t) months |> List.concat in
+    List.filter
+      (fun v -> String.equal v.Retirement_data.Types.booker_crsid booker)
+      vs
+    |> List.stable_sort (fun a b ->
+           Ptime.compare (Data.timestamp a) (Data.timestamp b))
 
   module Private = struct
     let close t = S.Repo.close t.transacted

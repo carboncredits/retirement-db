@@ -49,8 +49,7 @@ let set_and_get_hash ~clock ~net host () =
   let value =
     Retirement.Data.v
       ~version:{ major = 0; minor = 1; patch = None }
-      ~timestamp
-      "xyz123"
+      ~timestamp "xyz123"
       { crsid = "abc123"; department = "CST"; name = "Alice" }
       (`Grant
         {
@@ -124,6 +123,18 @@ let set_and_get_hash ~clock ~net host () =
   Alcotest.(check bool)
     "same tx status" true
     (match check.data with `Complete _ -> true | _ -> false);
+  let bookers_value =
+    Retirement_data.Types.{ booker = "xyz123"; months = 3 }
+    |> Rest.Request.get_bookers_to_json
+  in
+  let check =
+    req_to_json ~net Rest.Response.get_bookers_of_json ~host
+      ~path:"/get/bookers" bookers_value
+  in
+  Alcotest.(check (list store_content))
+    "same bookers bookings"
+    [ { value with tx_id = Some "ABCDEFGH" } ]
+    check.data;
   (* This should fail because we've already added the value *)
   let begin_value =
     Retirement_data.Types.{ value } |> Rest.Request.begin_tx_to_json

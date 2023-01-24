@@ -32,12 +32,16 @@ let ts_to_date ts =
   let t, _, _ = Ptime.of_rfc3339 ts |> Result.get_ok in
   Ptime.to_date t
 
+let timestamp t =
+  let t, _, _ = Ptime.of_rfc3339 t.Retirement_data.Types.ts |> Result.get_ok in
+  t
+
 let get_path ~digest (t : t) =
   let year, month, _ = ts_to_date t.ts in
   [ string_of_int year; string_of_int month; digest t ]
 
-let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp booker_crsid business_traveller finance
-    details offset =
+let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp booker_crsid
+    business_traveller finance details offset =
   match finance with
   | `Grant d ->
       {
@@ -101,8 +105,7 @@ let dummy_details ?tx_id ?timestamp clock =
   let timestamp =
     match timestamp with Some t -> t | None -> current_ts clock
   in
-  v ~timestamp ?tx_id
-    "xyz123"
+  v ~timestamp ?tx_id "xyz123"
     { crsid = "abc123"; department = "CST"; name = "Alice" }
     (`Grant dummy_grant_details) dummy_travel_details dummy_offset
 
@@ -132,6 +135,10 @@ module Rest = struct
     type get_content = Retirement_data.Types.get_content_request
 
     let get_content_to_json = Retirement_data.Json.string_of_get_content_request
+
+    type get_bookers = Retirement_data.Types.get_bookers_request
+
+    let get_bookers_to_json = Retirement_data.Json.string_of_get_bookers_request
   end
 
   module Response = struct
@@ -165,5 +172,10 @@ module Rest = struct
 
     let get_content_to_json = Retirement_data.Json.string_of_t_response
     let get_content_of_json = Retirement_data.Json.t_response_of_string
+
+    type get_bookers = Retirement_data.Types.t_list_response
+
+    let get_bookers_to_json = Retirement_data.Json.string_of_t_list_response
+    let get_bookers_of_json = Retirement_data.Json.t_list_response_of_string
   end
 end

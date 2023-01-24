@@ -178,6 +178,11 @@ type get_content_request = {
     hash : string;
 }
 
+type get_bookers_request = {
+    booker : string;
+    months : int;
+}
+
 (* Slight limitation of ATDTS *)
 type string_response = {
     errors : string list;
@@ -194,4 +199,9 @@ type tx_status_response = {
 type t_response = {
     errors : string list;
     data : t;
+}
+
+type t_list_response = {
+    errors : string list;
+    data : t list;
 }

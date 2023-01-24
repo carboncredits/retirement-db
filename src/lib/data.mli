@@ -36,6 +36,9 @@ val current_ts : Eio.Time.clock -> string
 val ts_to_date : string -> int * int * int
 (** Convert an RFC3339 timestamp to year, month and date. *)
 
+val timestamp : t -> Ptime.t
+(** Get the timestamp of a piece of data *)
+
 val get_path : digest:(t -> string) -> t -> string list
 (** Converts a [t] to the path where it will be stored. *)
 
@@ -78,6 +81,10 @@ module Rest : sig
     type get_content = Retirement_data.Types.get_content_request
 
     val get_content_to_json : ?len:int -> get_content -> string
+
+    type get_bookers = Retirement_data.Types.get_bookers_request
+
+    val get_bookers_to_json : ?len:int -> get_bookers -> string
   end
 
   module Response : sig
@@ -107,5 +114,10 @@ module Rest : sig
 
     val get_content_to_json : ?len:int -> get_content -> string
     val get_content_of_json : string -> get_content
+
+    type get_bookers = Retirement_data.Types.t_list_response
+
+    val get_bookers_to_json : ?len:int -> get_bookers -> string
+    val get_bookers_of_json : string -> get_bookers
   end
 end
