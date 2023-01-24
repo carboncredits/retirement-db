@@ -19,6 +19,13 @@ let json_headers s =
       ("Content-Length", string_of_int @@ String.length s);
     ]
 
+let csv_headers s =
+  Http.Header.of_list
+    [
+      ("Content-Type", "text/csv");
+      ("Content-Length", string_of_int @@ String.length s);
+    ]
+
 let _current_api_version = "v1"
 
 let success ppf s =
@@ -157,6 +164,20 @@ let v1_callback ~clock store ((req, body, _) : Cohttp_eio.Server.request) =
       in
       ( Http.Response.make ~headers:(json_headers items) ~status:`OK (),
         Body.Fixed items )
+  | `GET, [ "csv"; "flights"; year; month ] ->
+      let body =
+        Store.csv_by_flight ~year:(int_of_string year)
+          ~month:(int_of_string month) store
+      in
+      ( Http.Response.make ~headers:(csv_headers body) ~status:`OK (),
+        Body.Fixed body )
+  | `GET, [ "csv"; "finance"; year; month ] ->
+      let body =
+        Store.csv_by_finance ~year:(int_of_string year)
+          ~month:(int_of_string month) store
+      in
+      ( Http.Response.make ~headers:(csv_headers body) ~status:`OK (),
+        Body.Fixed body )
   | _meth, s ->
       Logs.info (fun f ->
           f "Not found %a %a" Fmt.(list string) s Request.pp req);
@@ -295,10 +316,11 @@ let check_tx ~fs stdin =
   Cmd.v info @@ Term.(const check $ logs $ directory)
 
 let dummy clock stdout =
-  let dummy () ts =
+  let dummy () some_timestamp =
     Eio.Flow.(
       copy_string
-        (Data.to_pretty_string Data.(dummy_details ?timestamp:ts clock))
+        (Data.to_pretty_string
+           Data.(dummy_details ?timestamp:some_timestamp clock))
         stdout)
   in
   let doc = "Write a dummy retirement JSON blob to stdout" in

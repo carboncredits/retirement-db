@@ -23,6 +23,8 @@ depends: [
   "logs"
   "dune-build-info"
   "ppx_deriving_yojson"
+  "ppx_fields_conv"
+  "ppx_csv_conv"
   "mdx"                {with-test}
   "alcotest"           {with-test}
 ]

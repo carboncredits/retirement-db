@@ -42,6 +42,46 @@ val timestamp : t -> Ptime.t
 val get_path : digest:(t -> string) -> t -> string list
 (** Converts a [t] to the path where it will be stored. *)
 
+module Flight_csv : sig
+  module Line : sig
+    type t = {
+      booker_crsid : string;
+      business_traveller_crsid : string;
+      departure : string;
+      arrival : string;
+      passenger_count : int;
+      flight_count : int;
+      aircraft_type : string;
+      ts : string;
+      tx_id : string;
+    }
+    [@@deriving fields, csv]
+  end
+
+  val to_csv : t -> Line.t list
+  (** [to_csv_by_flight] takes a data entry and converts it to a CSV row
+    (comma-separated) for each flight that took place. *)
+end
+
+module Finance_csv : sig
+  module Line : sig
+    type t = {
+      booker_crsid : string;
+      business_traveller_crsid : string;
+      total_flights : int;
+      co2e_amount : int;
+      ts : string;
+      tx_id : string;
+    }
+    [@@deriving fields, csv]
+  end
+
+  val to_csv : t -> Line.t option
+  (** [to_csv_by_finance] takes a data entry and converts it to a CSV row
+    (comma-separated) for financial information. Returns none if there is no
+      transaction id. *)
+end
+
 val v :
   ?version:Retirement_data.Types.version ->
   ?tx_id:string ->

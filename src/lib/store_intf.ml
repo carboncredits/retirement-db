@@ -67,6 +67,14 @@ module type S = sig
   val lookup_all_transacted : t -> path -> contents list
   (** Find all the contents at a path that have been transacted. *)
 
+  val csv_by_flight : year:int -> month:int -> t -> string
+  (** A CSV dump for a particular year and month showing individual flights. *)
+
+  val csv_by_finance : year:int -> month:int -> t -> string
+  (** A CSV dump for a particular year and month showing information for finances,
+      this means the flights are compressed to just the number but offset information
+      in relation to all flights for a given transaction are returned. *)
+
   val lookup_bookers_transacted :
     booker:string ->
     months:int ->

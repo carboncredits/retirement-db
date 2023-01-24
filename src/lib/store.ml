@@ -149,6 +149,38 @@ module Make (S : Data_store) = struct
     |> List.stable_sort (fun a b ->
            Ptime.compare (Data.timestamp a) (Data.timestamp b))
 
+  let csv_by_flight ~year ~month store =
+    let items =
+      lookup_all_transacted store [ string_of_int year; string_of_int month ]
+    in
+    let csvs = List.map Data.Flight_csv.to_csv items |> List.concat in
+    let header = Data.Flight_csv.Line.csv_header in
+    let buffer = Buffer.create 128 in
+    Buffer.add_string buffer (String.concat "," header ^ "\n");
+    List.iter
+      (fun v ->
+        Buffer.add_string buffer
+        @@ (String.concat "," @@ Data.Flight_csv.Line.row_of_t v)
+        ^ "\n")
+      csvs;
+    Buffer.contents buffer
+
+  let csv_by_finance ~year ~month store =
+    let items =
+      lookup_all_transacted store [ string_of_int year; string_of_int month ]
+    in
+    let csvs = List.filter_map Data.Finance_csv.to_csv items in
+    let header = Data.Finance_csv.Line.csv_header in
+    let buffer = Buffer.create 128 in
+    Buffer.add_string buffer (String.concat "," header ^ "\n");
+    List.iter
+      (fun v ->
+        Buffer.add_string buffer
+        @@ (String.concat "," @@ Data.Finance_csv.Line.row_of_t v)
+        ^ "\n")
+      csvs;
+    Buffer.contents buffer
+
   module Private = struct
     let close t = S.Repo.close t.transacted
   end
