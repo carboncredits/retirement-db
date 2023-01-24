@@ -43,12 +43,13 @@ val v :
   ?version:Retirement_data.Types.version ->
   ?tx_id:string ->
   timestamp:string ->
+  string ->
   Retirement_data.Types.cambridge_id ->
   finance_details ->
   Retirement_data.Types.travel_details ->
   Retirement_data.Types.offset ->
   t
-(** [v ?version details] constructs a new retirement data. If [version] is omitted, the 
+(** [v ?version details] constructs a new retirement data. If [version] is omitted, the
     latest version will be used. *)
 
 val dummy_details : ?tx_id:string -> ?timestamp:string -> Eio.Time.clock -> t

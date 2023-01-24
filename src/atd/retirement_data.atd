@@ -36,7 +36,7 @@ type flight_details <ocaml attr="deriving irmin"> = {
     aircraft_type <json name="aircraftType"> : string;
 }
 
-type train_class <ocaml attr="deriving irmin"> = [ 
+type train_class <ocaml attr="deriving irmin"> = [
     | Standard <json name="standard">
     | First_class <json name="first-class">
 ]
@@ -51,19 +51,19 @@ type train_details <ocaml attr="deriving irmin"> = {
 }
 
 type journey_time <ocaml attr="deriving irmin"> = [
-    | Zero_to_five <json name="0-5m"> 
-    | Five_to_ten <json name="5-10m"> 
-    | Ten_to_twenty_five <json name="10-25m"> 
-    | Twenty_five_to_fifty <json name="25-50m"> 
-    | Fifty_plus <json name="50m+"> 
+    | Zero_to_five <json name="0-5m">
+    | Five_to_ten <json name="5-10m">
+    | Ten_to_twenty_five <json name="10-25m">
+    | Twenty_five_to_fifty <json name="25-50m">
+    | Fifty_plus <json name="50m+">
 ]
 
 type taxi_type <ocaml attr="deriving irmin"> = [
-    | Electric <json name="electric"> 
-    | Hybrid <json name="hybrid"> 
-    | Standard <json name="standard"> 
-    | Executive <json name="executive"> 
-    | Airport_shuttle <json name="airport shuttle"> 
+    | Electric <json name="electric">
+    | Hybrid <json name="hybrid">
+    | Standard <json name="standard">
+    | Executive <json name="executive">
+    | Airport_shuttle <json name="airport shuttle">
 ]
 
 type taxi_details <ocaml attr="deriving irmin"> = {
@@ -82,7 +82,7 @@ type reason <ocaml attr="deriving irmin"> = [
     | Conference <json name="Conference">
     | Meeting_with_collaborators <json name="Meeting with collaborators">
     | Giving_an_invited_talk <json name="Giving an invited talk/lecture">
-    | PhD_viva <json name="PhD viva"> 
+    | PhD_viva <json name="PhD viva">
     | Fundraising_activities <json name="Fundraising activities">
     | Recruitment_of_university_staff <json name="Recruitment of university staff">
     | Research <json name="Research">
@@ -135,7 +135,8 @@ type t <ocaml attr="deriving irmin"> = {
     version : version;
     ts : string;
     details : travel_details;
-    id : cambridge_id;
+    booker_crsid : string;
+    business_traveller : cambridge_id;
     finance_kind <json name="financeKind">: finance_kind;
     offset : offset;
     ?tx_id : string option;
