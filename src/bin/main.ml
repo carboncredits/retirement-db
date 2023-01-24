@@ -136,18 +136,20 @@ let v1_callback ~clock store ((req, body, _) : Cohttp_eio.Server.request) =
       with
       | Error (`Msg m) -> send_error m
       | Ok data ->
-          let current_year, current_month, _ =
-            Ptime.of_float_s (Unix.gettimeofday ())
-            |> Option.get |> Ptime.to_date
-          in
-          let contents =
-            Store.lookup_bookers_transacted store ~booker:data.booker
-              ~months:data.months ~current_year ~current_month
-          in
-          let response =
-            Rest.Response.get_bookers_to_json { errors = []; data = contents }
-          in
-          response_with_body response)
+          if data.months < 1 then send_error "Months should be greater than 0!"
+          else
+            let current_year, current_month, _ =
+              Ptime.of_float_s (Unix.gettimeofday ())
+              |> Option.get |> Ptime.to_date
+            in
+            let contents =
+              Store.lookup_bookers_transacted store ~booker:data.booker
+                ~months:data.months ~current_year ~current_month
+            in
+            let response =
+              Rest.Response.get_bookers_to_json { errors = []; data = contents }
+            in
+            response_with_body response)
   | `GET, [ "json"; year; month ] ->
       let items =
         Store.lookup_all_transacted store [ year; month ]

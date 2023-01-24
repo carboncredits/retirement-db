@@ -142,7 +142,6 @@ module Make (S : Data_store) = struct
 
   let lookup_bookers_transacted ~booker ~months ~current_year ~current_month t =
     let months = previous_year_months ~months current_year current_month in
-    Eio.traceln "%a" Fmt.(list (list string)) months;
     let vs = List.map (lookup_all_transacted t) months |> List.concat in
     List.filter
       (fun v -> String.equal v.Retirement_data.Types.booker_crsid booker)

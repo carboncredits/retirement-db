@@ -29,7 +29,10 @@ let req_to_json ~net response ~host ~path body =
     Client.post ~conn ~body:(Body.Fixed body) ?headers net path ~host
   in
   let body = get_json ~headers ~net http (host, path) in
-  response body
+  let json = Yojson.Basic.from_string body in
+  match Yojson.Basic.Util.member "errors" json |> Yojson.Basic.Util.to_list with
+  | [] -> Ok (response body)
+  | ls -> Error (List.map Yojson.Basic.Util.to_string ls)
 
 let store_content =
   Alcotest.of_pp (fun ppf v ->
@@ -81,6 +84,7 @@ let set_and_get_hash ~clock ~net host () =
   let content =
     req_to_json ~net Rest.Response.begin_tx_of_json ~host ~path:"/tx/begin"
       begin_value
+    |> Result.get_ok
   in
   let hash = content.data in
   let mh = Store.Contents.hash value in
@@ -94,6 +98,7 @@ let set_and_get_hash ~clock ~net host () =
   let stored_value =
     req_to_json ~net Rest.Response.get_content_of_json ~host
       ~path:"/get/content" get_content_value
+    |> Result.get_ok
   in
   let v' = stored_value.data in
   Alcotest.(check store_content) "same stored content" value v';
@@ -103,6 +108,7 @@ let set_and_get_hash ~clock ~net host () =
   let check =
     req_to_json ~net Rest.Response.check_tx_status_of_json ~host
       ~path:"/tx/status" check_value
+    |> Result.get_ok
   in
   Alcotest.(check status) "same tx status" `Pending check.data;
   let complete_value =
@@ -119,31 +125,38 @@ let set_and_get_hash ~clock ~net host () =
   let check =
     req_to_json ~net Rest.Response.check_tx_status_of_json ~host
       ~path:"/tx/status" check_value
+    |> Result.get_ok
   in
   Alcotest.(check bool)
     "same tx status" true
     (match check.data with `Complete _ -> true | _ -> false);
-  let bookers_value =
-    Retirement_data.Types.{ booker = "xyz123"; months = 3 }
-    |> Rest.Request.get_bookers_to_json
+  let bookers_value, bad_bookers_value =
+    let b = Retirement_data.Types.{ booker = "xyz123"; months = 3 } in
+    Rest.Request.
+      (get_bookers_to_json b, get_bookers_to_json { b with months = 0 })
   in
-  let check =
-    req_to_json ~net Rest.Response.get_bookers_of_json ~host
-      ~path:"/get/bookers" bookers_value
+  let check, errors =
+    ( req_to_json ~net Rest.Response.get_bookers_of_json ~host
+        ~path:"/get/bookers" bookers_value
+      |> Result.get_ok,
+      req_to_json ~net Rest.Response.get_bookers_of_json ~host
+        ~path:"/get/bookers" bad_bookers_value
+      |> Result.get_error )
   in
   Alcotest.(check (list store_content))
     "same bookers bookings"
     [ { value with tx_id = Some "ABCDEFGH" } ]
     check.data;
+  Alcotest.(check int) "same errors" 1 (List.length errors);
   (* This should fail because we've already added the value *)
   let begin_value =
     Retirement_data.Types.{ value } |> Rest.Request.begin_tx_to_json
   in
-  let content =
+  let errors =
     req_to_json ~net Rest.Response.begin_tx_of_json ~host ~path:"/tx/begin"
       begin_value
+    |> Result.get_error
   in
-  let errors = content.errors in
   Alcotest.(check int) "same errors" 1 (List.length errors)
 
 let client clock net () =
