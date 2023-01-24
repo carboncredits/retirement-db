@@ -36,7 +36,7 @@ let get_path ~digest (t : t) =
   let year, month, _ = ts_to_date t.ts in
   [ string_of_int year; string_of_int month; digest t ]
 
-let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp id finance
+let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp booker_crsid business_traveller finance
     details offset =
   match finance with
   | `Grant d ->
@@ -44,7 +44,8 @@ let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp id finance
         T.version;
         ts = timestamp;
         details;
-        id;
+        booker_crsid;
+        business_traveller;
         offset;
         finance_kind = `Grant;
         tx_id;
@@ -56,7 +57,8 @@ let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp id finance
         T.version;
         ts = timestamp;
         details;
-        id;
+        booker_crsid;
+        business_traveller;
         offset;
         tx_id;
         finance_kind = `CostCentre;
@@ -100,6 +102,7 @@ let dummy_details ?tx_id ?timestamp clock =
     match timestamp with Some t -> t | None -> current_ts clock
   in
   v ~timestamp ?tx_id
+    "xyz123"
     { crsid = "abc123"; department = "CST"; name = "Alice" }
     (`Grant dummy_grant_details) dummy_travel_details dummy_offset
 

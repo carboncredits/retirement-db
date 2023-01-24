@@ -50,6 +50,7 @@ let set_and_get_hash ~clock ~net host () =
     Retirement.Data.v
       ~version:{ major = 0; minor = 1; patch = None }
       ~timestamp
+      "xyz123"
       { crsid = "abc123"; department = "CST"; name = "Alice" }
       (`Grant
         {

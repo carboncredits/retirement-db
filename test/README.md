@@ -1,7 +1,7 @@
 Transaction Store CLI
 ---------------------
 
-The transaction store has a CLI for managing the store. 
+The transaction store has a CLI for managing the store.
 
 ```sh
 $ retirement --version
@@ -24,7 +24,12 @@ $ retirement dummy --timestamp="2022-12-09T20:27:07-00:00"
     "primaryReason": "Conference",
     "reasonText": "Some reason for travelling!"
   },
-  "id": { "crsid": "abc123", "name": "Alice", "department": "CST" },
+  "booker_crsid": "xyz123",
+  "business_traveller": {
+    "crsid": "abc123",
+    "name": "Alice",
+    "department": "CST"
+  },
   "financeKind": "Grant",
   "offset": {
     "tokenId": 1234,
@@ -45,28 +50,28 @@ $ retirement dummy --timestamp="2022-12-09T20:27:07-00:00"
 We can then start a transaction in the store i.e. store some private data and get the hash!
 
 ```sh
-$ retirement dummy --timestamp="2022-12-09T20:27:07-00:00" | retirement begin-tx --directory=./test 
-1220d7e7ab75fdff1f5cc70f69dc5c2f02a08adcc2f8d0dd5c3060bdfea3a3ad6f79
+$ retirement dummy --timestamp="2022-12-09T20:27:07-00:00" | retirement begin-tx --directory=./test
+1220d5159067912fb5cf173b8ebad0134e804bd94d1ab8ba5510bc0516c9a566541f
 ```
 
 We can't add the same bit of data twice, our store relies on every value being unique.
 
 ```sh
-$ retirement dummy --timestamp="2022-12-09T20:27:07-00:00" | retirement begin-tx --directory=./test 
+$ retirement dummy --timestamp="2022-12-09T20:27:07-00:00" | retirement begin-tx --directory=./test
 Failed to store!
 ```
 
 After that, at any point, we can check the status of the value by its hash.
 
 ```sh
-$ echo 1220d7e7ab75fdff1f5cc70f69dc5c2f02a08adcc2f8d0dd5c3060bdfea3a3ad6f79 | retirement check-tx --directory=./test
+$ echo 1220d5159067912fb5cf173b8ebad0134e804bd94d1ab8ba5510bc0516c9a566541f | retirement check-tx --directory=./test
 PENDING
 ```
 
 We can then manually complete the transaction.
 
 ```sh
-$ echo "ABCDEFG" | retirement complete-tx --directory=./test --hash=1220d7e7ab75fdff1f5cc70f69dc5c2f02a08adcc2f8d0dd5c3060bdfea3a3ad6f79 | grep -o SUCCESS
+$ echo "ABCDEFG" | retirement complete-tx --directory=./test --hash=1220d5159067912fb5cf173b8ebad0134e804bd94d1ab8ba5510bc0516c9a566541f | grep -o SUCCESS
 SUCCESS
 ```
 
@@ -75,6 +80,6 @@ Just grepping in order to remove the commit hash that's returned to make the tes
 And check the status again
 
 ```sh
-$ echo 1220d7e7ab75fdff1f5cc70f69dc5c2f02a08adcc2f8d0dd5c3060bdfea3a3ad6f79 | retirement check-tx --directory=./test
+$ echo 1220d5159067912fb5cf173b8ebad0134e804bd94d1ab8ba5510bc0516c9a566541f | retirement check-tx --directory=./test
 COMPLETE: ABCDEFG
 ```

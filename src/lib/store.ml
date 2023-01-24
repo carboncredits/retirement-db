@@ -125,7 +125,7 @@ module Make (S : Data_store) = struct
     in
     List.fold_left
       (fun acc -> function _, `Contents (c, _) -> c :: acc | _ -> acc)
-      [] items
+      [] items |> List.rev
 
   module Private = struct
     let close t = S.Repo.close t.transacted

@@ -142,7 +142,8 @@ export type T = {
   version: Version;
   ts: string;
   details: TravelDetails;
-  id: CambridgeId;
+  booker_crsid: string;
+  business_traveller: CambridgeId;
   finance_kind: FinanceKind;
   offset: Offset;
   tx_id?: string;
@@ -648,7 +649,8 @@ export function writeT(x: T, context: any = x): any {
     'version': _atd_write_required_field('T', 'version', writeVersion, x.version, x),
     'ts': _atd_write_required_field('T', 'ts', _atd_write_string, x.ts, x),
     'details': _atd_write_required_field('T', 'details', writeTravelDetails, x.details, x),
-    'id': _atd_write_required_field('T', 'id', writeCambridgeId, x.id, x),
+    'booker_crsid': _atd_write_required_field('T', 'booker_crsid', _atd_write_string, x.booker_crsid, x),
+    'business_traveller': _atd_write_required_field('T', 'business_traveller', writeCambridgeId, x.business_traveller, x),
     'financeKind': _atd_write_required_field('T', 'finance_kind', writeFinanceKind, x.finance_kind, x),
     'offset': _atd_write_required_field('T', 'offset', writeOffset, x.offset, x),
     'tx_id': _atd_write_optional_field(_atd_write_string, x.tx_id, x),
@@ -662,7 +664,8 @@ export function readT(x: any, context: any = x): T {
     version: _atd_read_required_field('T', 'version', readVersion, x['version'], x),
     ts: _atd_read_required_field('T', 'ts', _atd_read_string, x['ts'], x),
     details: _atd_read_required_field('T', 'details', readTravelDetails, x['details'], x),
-    id: _atd_read_required_field('T', 'id', readCambridgeId, x['id'], x),
+    booker_crsid: _atd_read_required_field('T', 'booker_crsid', _atd_read_string, x['booker_crsid'], x),
+    business_traveller: _atd_read_required_field('T', 'business_traveller', readCambridgeId, x['business_traveller'], x),
     finance_kind: _atd_read_required_field('T', 'financeKind', readFinanceKind, x['financeKind'], x),
     offset: _atd_read_required_field('T', 'offset', readOffset, x['offset'], x),
     tx_id: _atd_read_optional_field(_atd_read_string, x['tx_id'], x),

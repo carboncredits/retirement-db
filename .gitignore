@@ -4,5 +4,7 @@ duniverse
 db
 irmin
 var
+_opam
 
 *.js
+.ocamlformat
