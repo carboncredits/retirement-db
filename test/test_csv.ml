@@ -12,7 +12,7 @@ let flight : Retirement_data.Types.flight_details =
   {
     arrival = { iata_code = "BFS"; name = "Belfast Intl."; id = "BFS" };
     departure = { iata_code = "LHR"; name = "London Heathrow"; id = "LHR" };
-    aircraft_type = "A320";
+    aircraft_type = Some "A320";
     flight_count = 2;
     passenger_count = 2;
     travel_class = Some "blah";

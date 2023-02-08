@@ -33,7 +33,7 @@ type flight_details <ocaml attr="deriving irmin"> = {
     flight_count <json name="flightCount"> : int;
     ?travel_class <json name="travelClass"> : string option;
     ?charter : string option;
-    aircraft_type <json name="aircraftType"> : string;
+    ?aircraft_type <json name="aircraftType"> : string option;
 }
 
 type train_class <ocaml attr="deriving irmin"> = [

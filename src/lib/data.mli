@@ -51,7 +51,6 @@ module Flight_csv : sig
       arrival : string;
       passenger_count : int;
       flight_count : int;
-      aircraft_type : string;
       ts : string;
       tx_id : string;
     }

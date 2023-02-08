@@ -1,7 +1,6 @@
-4c-retirement-db
-----------------
+## 4c-retirement-db
 
-The Irmin database and server for 4c-retirement data. 
+The Irmin database and server for 4c-retirement data.
 
 ## Structure
 
@@ -29,6 +28,3 @@ $ irmin get hello/world --root=./var
 ```
 
 The default store is on the file-system using a git-compatible format and JSON serialisation, so it is entirely possible to `cd` into the directory and checkout the `main` branch and interact with the files directly and `git commit` changes.
-
-
-

@@ -1,5 +1,4 @@
-Transaction Store CLI
----------------------
+## Transaction Store CLI
 
 The transaction store has a CLI for managing the store.
 

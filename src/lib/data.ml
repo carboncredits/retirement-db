@@ -50,7 +50,6 @@ module Flight_csv = struct
       arrival : string;
       passenger_count : int;
       flight_count : int;
-      aircraft_type : string;
       ts : string;
       tx_id : string;
     }
@@ -70,7 +69,6 @@ module Flight_csv = struct
               arrival = v.arrival.iata_code;
               passenger_count = v.passenger_count;
               flight_count = v.flight_count;
-              aircraft_type = v.aircraft_type;
               ts = t.ts;
               tx_id;
             }

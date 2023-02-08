@@ -10,7 +10,11 @@
     "reasonText": "Some reason for travelling!"
   },
   "booker_crsid": "xyz123",
-  "business_traveller": { "crsid": "abc123", "name": "Alice", "department": "CST" },
+  "business_traveller": {
+    "crsid": "abc123",
+    "name": "Alice",
+    "department": "CST"
+  },
   "financeKind": "Grant",
   "offset": {
     "tokenId": 1234,
