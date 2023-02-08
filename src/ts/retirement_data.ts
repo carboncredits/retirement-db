@@ -42,7 +42,7 @@ export type FlightDetails = {
   flight_count: Int;
   travel_class?: string;
   charter?: string;
-  aircraft_type: string;
+  aircraft_type?: string;
 }
 
 export type TrainClass =
@@ -327,7 +327,7 @@ export function writeFlightDetails(x: FlightDetails, context: any = x): any {
     'flightCount': _atd_write_required_field('FlightDetails', 'flight_count', _atd_write_int, x.flight_count, x),
     'travelClass': _atd_write_optional_field(_atd_write_string, x.travel_class, x),
     'charter': _atd_write_optional_field(_atd_write_string, x.charter, x),
-    'aircraftType': _atd_write_required_field('FlightDetails', 'aircraft_type', _atd_write_string, x.aircraft_type, x),
+    'aircraftType': _atd_write_optional_field(_atd_write_string, x.aircraft_type, x),
   };
 }
 
@@ -339,7 +339,7 @@ export function readFlightDetails(x: any, context: any = x): FlightDetails {
     flight_count: _atd_read_required_field('FlightDetails', 'flightCount', _atd_read_int, x['flightCount'], x),
     travel_class: _atd_read_optional_field(_atd_read_string, x['travelClass'], x),
     charter: _atd_read_optional_field(_atd_read_string, x['charter'], x),
-    aircraft_type: _atd_read_required_field('FlightDetails', 'aircraftType', _atd_read_string, x['aircraftType'], x),
+    aircraft_type: _atd_read_optional_field(_atd_read_string, x['aircraftType'], x),
   };
 }
 
