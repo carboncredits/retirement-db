@@ -27,6 +27,7 @@ type airport <ocaml attr="deriving irmin"> = {
 }
 
 type flight_details <ocaml attr="deriving irmin"> = {
+    date : string;
     departure : airport;
     arrival : airport;
     passenger_count <json name="passengerCount"> : int;

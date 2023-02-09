@@ -143,7 +143,18 @@ let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp booker_crsid
 let dummy_travel_details =
   Retirement_data.Types.
     {
-      flight_details = [];
+      flight_details = [
+        {
+          date = "2023-02-09T15:48:10.801Z";
+          departure = { iata_code = "BFS"; id = "BFS"; name = "Belfast" };
+          arrival = { iata_code = "LHR"; id = "LHR"; name = "London" };
+          aircraft_type = None;
+          passenger_count = 1;
+          travel_class = None;
+          flight_count = 1;
+          charter = None
+        }
+      ];
       train_details = [];
       taxi_details = [];
       additional_details = [];
