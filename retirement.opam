@@ -17,6 +17,7 @@ depends: [
   "irmin-fs"           {= "dev"}
   "eio_main"           {>= "0.7"}
   "ptime"
+
   "multihash-digestif"
   "bisect_ppx"         {>= "2.8.1"} # Not sure why I need this?
   "cohttp-eio"
