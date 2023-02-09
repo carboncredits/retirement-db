@@ -153,8 +153,9 @@ let v1_callback ~clock store ((req, body, _) : Cohttp_eio.Server.request) =
               Store.lookup_bookers_transacted store ~booker:data.booker
                 ~months:data.months ~current_year ~current_month
             in
+            let data = List.map (fun v -> (v, Store.hash_content v)) contents in
             let response =
-              Rest.Response.get_bookers_to_json { errors = []; data = contents }
+              Rest.Response.get_bookers_to_json { errors = []; data }
             in
             response_with_body response)
   | `GET, [ "json"; year; month ] ->
