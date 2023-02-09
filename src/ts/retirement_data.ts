@@ -209,7 +209,7 @@ export type TResponse = {
 
 export type TListResponse = {
   errors: string[];
-  data: T[];
+  data: [T, string][];
 }
 
 export function writeVersion(x: Version, context: any = x): any {
@@ -868,14 +868,14 @@ export function readTResponse(x: any, context: any = x): TResponse {
 export function writeTListResponse(x: TListResponse, context: any = x): any {
   return {
     'errors': _atd_write_required_field('TListResponse', 'errors', _atd_write_array(_atd_write_string), x.errors, x),
-    'data': _atd_write_required_field('TListResponse', 'data', _atd_write_array(writeT), x.data, x),
+    'data': _atd_write_required_field('TListResponse', 'data', _atd_write_array(((x, context) => [writeT(x[0], x), _atd_write_string(x[1], x)])), x.data, x),
   };
 }
 
 export function readTListResponse(x: any, context: any = x): TListResponse {
   return {
     errors: _atd_read_required_field('TListResponse', 'errors', _atd_read_array(_atd_read_string), x['errors'], x),
-    data: _atd_read_required_field('TListResponse', 'data', _atd_read_array(readT), x['data'], x),
+    data: _atd_read_required_field('TListResponse', 'data', _atd_read_array(((x, context): [T, string] => { _atd_check_json_tuple(2, x, context); return [readT(x[0], x), _atd_read_string(x[1], x)] })), x['data'], x),
   };
 }
 

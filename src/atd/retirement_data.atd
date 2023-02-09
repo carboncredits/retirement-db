@@ -203,5 +203,5 @@ type t_response = {
 
 type t_list_response = {
     errors : string list;
-    data : t list;
+    data : (t * string) list;
 }

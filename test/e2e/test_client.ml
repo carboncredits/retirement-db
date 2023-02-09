@@ -146,7 +146,7 @@ let set_and_get_hash ~clock ~net host () =
   Alcotest.(check (list store_content))
     "same bookers bookings"
     [ { value with tx_id = Some "ABCDEFGH" } ]
-    check.data;
+    (List.map fst check.data);
   Alcotest.(check int) "same errors" 1 (List.length errors);
   (* This should fail because we've already added the value *)
   let begin_value =
