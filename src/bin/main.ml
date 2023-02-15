@@ -153,7 +153,11 @@ let v1_callback ~clock store ((req, body, _) : Cohttp_eio.Server.request) =
               Store.lookup_bookers_transacted store ~booker:data.booker
                 ~months:data.months ~current_year ~current_month
             in
-            let data = List.map (fun v -> (v, Store.hash_content { v with tx_id = None })) contents in
+            let data =
+              List.map
+                (fun v -> (v, Store.hash_content { v with tx_id = None }))
+                contents
+            in
             let response =
               Rest.Response.get_bookers_to_json { errors = []; data }
             in
@@ -328,6 +332,27 @@ let dummy clock stdout =
   let info = Cmd.info "dummy" ~doc in
   Cmd.v info @@ Term.(const dummy $ logs $ timestamp)
 
+let lookup ~fs =
+  let check () dir hash =
+    Irmin_fs.run fs @@ fun () ->
+    let store = init_store dir in
+    let contents = Store.find store ~hash in
+    Fmt.pr "%a%!" (Fmt.option @@ Irmin.Type.pp Data.t) contents
+  in
+  let doc = "Lookup data using hash." in
+  let info = Cmd.info "lookup" ~doc in
+  Cmd.v info @@ Term.(const check $ logs $ directory $ content_address)
+
+let dump ~fs =
+  let check () dir =
+    Irmin_fs.run fs @@ fun () ->
+    let store = init_store dir in
+    Fmt.pr "%a" Store.Private.dump store
+  in
+  let doc = "Dump all of the contents of the store to stdout." in
+  let info = Cmd.info "dump" ~doc in
+  Cmd.v info @@ Term.(const check $ logs $ directory)
+
 let cmds env =
   [
     serve env;
@@ -335,6 +360,8 @@ let cmds env =
     complete_tx ~fs:env#fs ~clock:env#clock env#stdin;
     check_tx ~fs:env#fs env#stdin;
     dummy env#clock env#stdout;
+    lookup ~fs:env#fs;
+    dump ~fs:env#fs;
   ]
 
 let version =

@@ -1,7 +1,6 @@
 _build
 .vscode
 duniverse
-db
 irmin
 var
 _opam
