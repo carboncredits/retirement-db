@@ -38,6 +38,7 @@ export type Airport = {
 export type FlightDetails = {
   date: string;
   departure: Airport;
+  random: string;
   arrival: Airport;
   passenger_count: Int;
   flight_count: Int;
@@ -324,6 +325,7 @@ export function writeFlightDetails(x: FlightDetails, context: any = x): any {
   return {
     'date': _atd_write_required_field('FlightDetails', 'date', _atd_write_string, x.date, x),
     'departure': _atd_write_required_field('FlightDetails', 'departure', writeAirport, x.departure, x),
+    'random': _atd_write_field_with_default(_atd_write_string, "", x.random, x),
     'arrival': _atd_write_required_field('FlightDetails', 'arrival', writeAirport, x.arrival, x),
     'passengerCount': _atd_write_required_field('FlightDetails', 'passenger_count', _atd_write_int, x.passenger_count, x),
     'flightCount': _atd_write_required_field('FlightDetails', 'flight_count', _atd_write_int, x.flight_count, x),
@@ -337,6 +339,7 @@ export function readFlightDetails(x: any, context: any = x): FlightDetails {
   return {
     date: _atd_read_required_field('FlightDetails', 'date', _atd_read_string, x['date'], x),
     departure: _atd_read_required_field('FlightDetails', 'departure', readAirport, x['departure'], x),
+    random: _atd_read_field_with_default(_atd_read_string, "", x['random'], x),
     arrival: _atd_read_required_field('FlightDetails', 'arrival', readAirport, x['arrival'], x),
     passenger_count: _atd_read_required_field('FlightDetails', 'passengerCount', _atd_read_int, x['passengerCount'], x),
     flight_count: _atd_read_required_field('FlightDetails', 'flightCount', _atd_read_int, x['flightCount'], x),

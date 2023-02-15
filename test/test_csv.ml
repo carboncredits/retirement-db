@@ -11,6 +11,7 @@ let mock_clock = Eio_mock.Clock.make ()
 let flight : Retirement_data.Types.flight_details =
   {
     date = "2023-02-09T15:48:10.801Z";
+    random = "";
     arrival = { iata_code = "BFS"; name = "Belfast Intl."; id = "BFS" };
     departure = { iata_code = "LHR"; name = "London Heathrow"; id = "LHR" };
     aircraft_type = Some "A320";

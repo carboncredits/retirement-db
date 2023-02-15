@@ -13,13 +13,14 @@ in these tests but you could just leave it out and the current time will be used
 ```sh
 $ retirement dummy --timestamp="2022-12-09T20:27:07-00:00"
 {
-  "version": { "major": 0, "minor": 1 },
+  "version": { "major": 0, "minor": 2 },
   "ts": "2022-12-09T20:27:07-00:00",
   "details": {
     "flightDetails": [
       {
         "date": "2023-02-09T15:48:10.801Z",
         "departure": { "id": "BFS", "name": "Belfast", "iataCode": "BFS" },
+        "random": "Some random text",
         "arrival": { "id": "LHR", "name": "London", "iataCode": "LHR" },
         "passengerCount": 1,
         "flightCount": 1
@@ -58,7 +59,7 @@ We can then start a transaction in the store i.e. store some private data and ge
 
 ```sh
 $ retirement dummy --timestamp="2022-12-09T20:27:07-00:00" | retirement begin-tx --directory=./test
-122046c538d79246821b4f649e73bd8d576875fd30712d4446d0bd1627b2c755141e
+1220d487113e7427dda21e4d05d0b1681e986b2fc68788f8b669d58cd2e2d5b01d87
 ```
 
 We can't add the same bit of data twice, our store relies on every value being unique.
@@ -71,14 +72,14 @@ Failed to store!
 After that, at any point, we can check the status of the value by its hash.
 
 ```sh
-$ echo 122046c538d79246821b4f649e73bd8d576875fd30712d4446d0bd1627b2c755141e | retirement check-tx --directory=./test
+$ echo 1220d487113e7427dda21e4d05d0b1681e986b2fc68788f8b669d58cd2e2d5b01d87 | retirement check-tx --directory=./test
 PENDING
 ```
 
 We can then manually complete the transaction.
 
 ```sh
-$ echo "ABCDEFG" | retirement complete-tx --directory=./test --hash=122046c538d79246821b4f649e73bd8d576875fd30712d4446d0bd1627b2c755141e | grep -o SUCCESS
+$ echo "ABCDEFG" | retirement complete-tx --directory=./test --hash=1220d487113e7427dda21e4d05d0b1681e986b2fc68788f8b669d58cd2e2d5b01d87 | grep -o SUCCESS
 SUCCESS
 ```
 
@@ -87,6 +88,6 @@ Just grepping in order to remove the commit hash that's returned to make the tes
 And check the status again
 
 ```sh
-$ echo 122046c538d79246821b4f649e73bd8d576875fd30712d4446d0bd1627b2c755141e | retirement check-tx --directory=./test
+$ echo 1220d487113e7427dda21e4d05d0b1681e986b2fc68788f8b669d58cd2e2d5b01d87 | retirement check-tx --directory=./test
 COMPLETE: ABCDEFG
 ```

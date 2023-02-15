@@ -204,6 +204,7 @@ let dummy_travel_details =
           {
             date = "2023-02-09T15:48:10.801Z";
             departure = { iata_code = "BFS"; id = "BFS"; name = "Belfast" };
+            random = "Some random text";
             arrival = { iata_code = "LHR"; id = "LHR"; name = "London" };
             aircraft_type = None;
             passenger_count = 1;

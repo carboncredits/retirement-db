@@ -25,7 +25,8 @@ echo "ABCDEFG" | retirement complete-tx --directory=./db --hash=<hash>
 
 ```json
 {
-  "v0_0_1": "1220b4dcf753472077948c277f0bdf4b04a93187f6996b929f2d7f98ff32c05bb3ee"
+  "v0_1_0": "1220b4dcf753472077948c277f0bdf4b04a93187f6996b929f2d7f98ff32c05bb3ee",
+  "v0_2_0": "122038eec94fba502636ce704ce5daa23710aa86b27c09da03ef1154edc53cc43951"
 }
 ```
 
@@ -36,6 +37,7 @@ echo "ABCDEFG" | retirement complete-tx --directory=./db --hash=<hash>
 ```sh
 $ retirement dump --directory=./db
 {"version":{"major":0,"minor":1},"ts":"2023-02-15T22:02:33-00:00","details":{"flightDetails":[{"date":"2023-02-09t5:48:10.801Z","departure":{"id":"BFS","name":"Belfast","iataCode":"BFS"},"arrival":{"id":"LHR","name":"London","iataCode":"LHR"},"passengerCount":1,"flightCount":1}],"trainDetails":[],"taxiDetails":[],"additionalDetails":[],"primaryReason":"Conference","reasonText":"Some reason for travelling!"},"booker_crsid":"xyz123","business_traveller":{"crsid":"abc123","name":"Alice","department":"CST"},"financeKind":"Grant","offset":{"tokenId":1234,"projectName":"Gola","minter":"abcd1234wxyz5678","kyc":"1234abcd5678wxyz","amount":556789},"tx_id":"ABCDEFG\n","grantDetails":{"sponsorAndPiConfirmation":true,"award":"award","project":"project","task":"task"}}
+{"version":{"major":0,"minor":2},"ts":"2023-02-15T22:46:20-00:00","details":{"flightDetails":[{"date":"2023-02-09T15:48:10.801Z","departure":{"id":"BFS","name":"Belfast","iataCode":"BFS"},"random":"Some random text","arrival":{"id":"LHR","name":"London","iataCode":"LHR"},"passengerCount":1,"flightCount":1}],"trainDetails":[],"taxiDetails":[],"additionalDetails":[],"primaryReason":"Conference","reasonText":"Some reason for travelling!"},"booker_crsid":"xyz123","business_traveller":{"crsid":"abc123","name":"Alice","department":"CST"},"financeKind":"Grant","offset":{"tokenId":1234,"projectName":"Gola","minter":"abcd1234wxyz5678","kyc":"1234abcd5678wxyz","amount":556789},"tx_id":"ABCDEFG\n","grantDetails":{"sponsorAndPiConfirmation":true,"award":"award","project":"project","task":"task"}}
 ```
 
 ### Hash lookup still works
@@ -45,4 +47,6 @@ If you add a new value, add another line to this test!
 ```sh
 $ retirement lookup --directory=./db --hash=1220b4dcf753472077948c277f0bdf4b04a93187f6996b929f2d7f98ff32c05bb3ee
 {"version":{"major":0,"minor":1},"ts":"2023-02-15T22:02:33-00:00","details":{"flightDetails":[{"date":"2023-02-09t5:48:10.801Z","departure":{"id":"BFS","name":"Belfast","iataCode":"BFS"},"arrival":{"id":"LHR","name":"London","iataCode":"LHR"},"passengerCount":1,"flightCount":1}],"trainDetails":[],"taxiDetails":[],"additionalDetails":[],"primaryReason":"Conference","reasonText":"Some reason for travelling!"},"booker_crsid":"xyz123","business_traveller":{"crsid":"abc123","name":"Alice","department":"CST"},"financeKind":"Grant","offset":{"tokenId":1234,"projectName":"Gola","minter":"abcd1234wxyz5678","kyc":"1234abcd5678wxyz","amount":556789},"grantDetails":{"sponsorAndPiConfirmation":true,"award":"award","project":"project","task":"task"}}
+$ retirement lookup --directory=./db --hash=122038eec94fba502636ce704ce5daa23710aa86b27c09da03ef1154edc53cc43951
+{"version":{"major":0,"minor":2},"ts":"2023-02-15T22:46:20-00:00","details":{"flightDetails":[{"date":"2023-02-09T15:48:10.801Z","departure":{"id":"BFS","name":"Belfast","iataCode":"BFS"},"random":"Some random text","arrival":{"id":"LHR","name":"London","iataCode":"LHR"},"passengerCount":1,"flightCount":1}],"trainDetails":[],"taxiDetails":[],"additionalDetails":[],"primaryReason":"Conference","reasonText":"Some reason for travelling!"},"booker_crsid":"xyz123","business_traveller":{"crsid":"abc123","name":"Alice","department":"CST"},"financeKind":"Grant","offset":{"tokenId":1234,"projectName":"Gola","minter":"abcd1234wxyz5678","kyc":"1234abcd5678wxyz","amount":556789},"grantDetails":{"sponsorAndPiConfirmation":true,"award":"award","project":"project","task":"task"}}
 ```
