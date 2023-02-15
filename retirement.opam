@@ -30,6 +30,7 @@ depends: [
 ]
 synopsis: "Project metadata server"
 pin-depends:[
+  [ "repr.dev" "git+https://github.com/mirage/repr#2b260367d8073a421e38be4e564d2c1931d15ee0"]
   [ "irmin-watcher.dev" "git+https://github.com/patricoferris/irmin-watcher#d0e92b4ba5631b5f4dc0f3c00d97e79542dba45d" ]
   [ "irmin.dev" "git+https://github.com/patricoferris/irmin#ecfabf46357d19316f969bf8b8c578355b322c55" ]
   [ "irmin-fs.dev" "git+https://github.com/patricoferris/irmin#ecfabf46357d19316f969bf8b8c578355b322c55" ]
