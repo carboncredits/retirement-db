@@ -1,0 +1,6 @@
+(mdx
+ (files README.md)
+ (deps
+  (source_tree db)
+  (package retirement))
+ (package retirement))

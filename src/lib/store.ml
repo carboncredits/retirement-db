@@ -129,6 +129,10 @@ module Make (S : Data_store) = struct
     |> List.stable_sort (fun a b ->
            Ptime.compare (Data.timestamp a) (Data.timestamp b))
 
+  let get_all t =
+    let root = S.tree (S.main t.transacted) in
+    S.Tree.fold ~contents:(fun _ c acc -> c :: acc) root []
+
   let previous_year_months ~months current_year current_month =
     let months =
       List.init months (fun i ->
@@ -183,5 +187,9 @@ module Make (S : Data_store) = struct
 
   module Private = struct
     let close t = S.Repo.close t.transacted
+
+    let dump ppf t =
+      let items = get_all t in
+      Fmt.pf ppf "%a" Fmt.(list (Irmin.Type.pp Data.t)) items
   end
 end

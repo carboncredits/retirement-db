@@ -58,7 +58,7 @@ We can then start a transaction in the store i.e. store some private data and ge
 
 ```sh
 $ retirement dummy --timestamp="2022-12-09T20:27:07-00:00" | retirement begin-tx --directory=./test
-1220113240b92a25887191eca8b6f2eeb0c4ee213824e13f46c06de313bf0831e0c1
+122046c538d79246821b4f649e73bd8d576875fd30712d4446d0bd1627b2c755141e
 ```
 
 We can't add the same bit of data twice, our store relies on every value being unique.
@@ -71,14 +71,14 @@ Failed to store!
 After that, at any point, we can check the status of the value by its hash.
 
 ```sh
-$ echo 1220113240b92a25887191eca8b6f2eeb0c4ee213824e13f46c06de313bf0831e0c1 | retirement check-tx --directory=./test
+$ echo 122046c538d79246821b4f649e73bd8d576875fd30712d4446d0bd1627b2c755141e | retirement check-tx --directory=./test
 PENDING
 ```
 
 We can then manually complete the transaction.
 
 ```sh
-$ echo "ABCDEFG" | retirement complete-tx --directory=./test --hash=1220113240b92a25887191eca8b6f2eeb0c4ee213824e13f46c06de313bf0831e0c1 | grep -o SUCCESS
+$ echo "ABCDEFG" | retirement complete-tx --directory=./test --hash=122046c538d79246821b4f649e73bd8d576875fd30712d4446d0bd1627b2c755141e | grep -o SUCCESS
 SUCCESS
 ```
 
@@ -87,6 +87,6 @@ Just grepping in order to remove the commit hash that's returned to make the tes
 And check the status again
 
 ```sh
-$ echo 1220113240b92a25887191eca8b6f2eeb0c4ee213824e13f46c06de313bf0831e0c1 | retirement check-tx --directory=./test
+$ echo 122046c538d79246821b4f649e73bd8d576875fd30712d4446d0bd1627b2c755141e | retirement check-tx --directory=./test
 COMPLETE: ABCDEFG
 ```

@@ -3,7 +3,63 @@ module J = Retirement_data.Json
 
 type t = T.t
 
-let t = T.t
+let wrap_exn f v =
+  try Ok (f v) with exn -> Error (`Msg (Printexc.to_string exn))
+
+let t =
+  let of_string s = wrap_exn J.t_of_string s in
+  let pp ppf (v : t) =
+    let buffer = Buffer.create 128 in
+    J.write_t buffer v;
+    Buffer.contents buffer |> Fmt.string ppf
+  in
+  let json =
+    let enc e v =
+      let dst = Jsonm.encoder_dst e in
+      match dst with
+      | `Buffer buffer -> J.write_t buffer v
+      | `Channel oc ->
+          let buff = Buffer.create 128 in
+          J.write_t buff v;
+          Buffer.output_buffer oc buff
+      | _ -> failwith "Manual dst unsupported"
+    in
+    let dec d =
+      let src =
+        Irmin.Type.Json.decoder_and_lexemes d |> fst |> Jsonm.decoder_src
+      in
+      match src with
+      | `String s -> wrap_exn J.t_of_string s
+      | `Channel ic ->
+          let lexbuf = Lexing.from_channel ic in
+          let state = Yojson.init_lexer () in
+          wrap_exn (J.read_t state) lexbuf
+      | `Manual -> Error (`Msg "Manual src not supported")
+    in
+    (enc, dec)
+  in
+  let bin : t Repr.encode_bin * t Repr.decode_bin * t Repr.size_of =
+    let encode_bin (v : t) (f : string -> unit) : unit = f (J.string_of_t v) in
+    let decode_bin (s : string) (i : int ref) : t =
+      let v = J.t_of_string s in
+      i := !i + String.length s;
+      v
+    in
+    let size = Irmin.Type.Size.t T.t in
+    (encode_bin, decode_bin, size)
+  in
+  let unboxed_bin : t Repr.encode_bin * t Repr.decode_bin * t Repr.size_of =
+    let encode_bin (v : t) (f : string -> unit) : unit = f (J.string_of_t v) in
+    let decode_bin (s : string) (i : int ref) : t =
+      let v = J.t_of_string s in
+      i := !i + String.length s;
+      v
+    in
+    let size = Irmin.Type.Size.t T.t in
+    (encode_bin, decode_bin, size)
+  in
+  Irmin.Type.like ~unboxed_bin ~bin ~compare ~json ~pp ~of_string T.t
+
 let version (t : T.t) = t.version
 
 let raw_version s =
@@ -143,18 +199,19 @@ let v ?(version = Retirement_data.latest_version) ?tx_id ~timestamp booker_crsid
 let dummy_travel_details =
   Retirement_data.Types.
     {
-      flight_details = [
-        {
-          date = "2023-02-09T15:48:10.801Z";
-          departure = { iata_code = "BFS"; id = "BFS"; name = "Belfast" };
-          arrival = { iata_code = "LHR"; id = "LHR"; name = "London" };
-          aircraft_type = None;
-          passenger_count = 1;
-          travel_class = None;
-          flight_count = 1;
-          charter = None
-        }
-      ];
+      flight_details =
+        [
+          {
+            date = "2023-02-09T15:48:10.801Z";
+            departure = { iata_code = "BFS"; id = "BFS"; name = "Belfast" };
+            arrival = { iata_code = "LHR"; id = "LHR"; name = "London" };
+            aircraft_type = None;
+            passenger_count = 1;
+            travel_class = None;
+            flight_count = 1;
+            charter = None;
+          };
+        ];
       train_details = [];
       taxi_details = [];
       additional_details = [];
@@ -191,7 +248,7 @@ let dummy_details ?tx_id ?timestamp clock =
     (`Grant dummy_grant_details) dummy_travel_details dummy_offset
 
 let details t = t.T.details
-let merge' ~old:_ t1 _t2 = Ok t1
+let merge' ~old:_ t _t2 = Ok t
 let merge = Irmin.Merge.(option (v t merge'))
 
 module Rest = struct

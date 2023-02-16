@@ -87,6 +87,7 @@ module type S = sig
 
   module Private : sig
     val close : t -> unit
+    val dump : t Fmt.t
   end
 end
 
