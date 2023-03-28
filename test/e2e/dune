@@ -2,11 +2,11 @@
  (name test_client)
  (libraries
   alcotest
-  eio_main
+  lwt.unix
   irmin.mem
   retirement
   retirement-data
-  cohttp-eio))
+  cohttp-lwt-unix))
 
 (rule
  (alias runtest)
