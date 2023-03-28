@@ -28,5 +28,5 @@ depends: [
 ]
 synopsis: "Project metadata server"
 pin-depends:[
-  [ "repr.dev" "git+https://github.com/mirage/repr#2b260367d8073a421e38be4e564d2c1931d15ee0"]
+  [ "repr.dev" "git+https://github.com/mirage/repr#2b260367d8073a421e38be4e564d2c1931d15ee0" ]
 ]
