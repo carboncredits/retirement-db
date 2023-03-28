@@ -23,6 +23,7 @@ depends: [
   "ppx_deriving_yojson"
   "ppx_fields_conv"
   "ppx_csv_conv"
+  "repr"               {= "dev"}
   "mdx"                {with-test}
   "alcotest"           {with-test}
 ]
