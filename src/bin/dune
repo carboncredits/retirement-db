@@ -3,11 +3,11 @@
  (package retirement)
  (public_name retirement)
  (libraries
-  eio_main
+  lwt.unix
   fmt.tty
   fmt.cli
   logs.cli
-  cohttp-eio
+  cohttp-lwt-unix
   irmin-fs.unix
   multihash-digestif
   retirement

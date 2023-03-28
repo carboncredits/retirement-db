@@ -3,19 +3,19 @@
  (modules test)
  (deps
   (source_tree versions))
- (libraries eio_main eio.mock alcotest retirement irmin.mem irmin-fs.unix))
+ (libraries lwt.unix alcotest retirement irmin.mem irmin-fs.unix))
 
 (test
  (name test_csv)
  (modules test_csv)
  (deps
   (source_tree versions))
- (libraries eio_main eio.mock alcotest retirement irmin.mem irmin-fs.unix))
+ (libraries lwt.unix alcotest retirement irmin.mem irmin-fs.unix))
 
 (test
  (name concurrent)
  (modules concurrent)
- (libraries eio_main eio.mock alcotest retirement irmin-fs.unix))
+ (libraries lwt.unix alcotest retirement irmin-fs.unix))
 
 (mdx
  (deps

@@ -1,3 +1,4 @@
+open Lwt.Syntax
 open Retirement
 
 module Irmin_store = struct
@@ -6,7 +7,16 @@ end
 
 module Store = Store.Make (Irmin_store)
 
-let mock_clock = Eio_mock.Clock.make ()
+type clock = < float Data.Time.clock_base ; set_time : float -> unit >
+
+let mock_clock : clock =
+  object
+    val mutable clock = 0.
+    method now = clock
+    method set_time f = clock <- f
+  end
+
+let set_time (c : clock) = c#set_time
 
 let flight : Retirement_data.Types.flight_details =
   {
@@ -21,16 +31,16 @@ let flight : Retirement_data.Types.flight_details =
   }
 
 let projects =
-  Eio_mock.Clock.set_time mock_clock 1.;
-  let v1 = Data.dummy_details (mock_clock :> Eio.Time.clock) in
+  set_time mock_clock 1.;
+  let v1 = Data.dummy_details mock_clock in
   let v1 =
     {
       v1 with
       details = { v1.details with flight_details = [ flight; flight; flight ] };
     }
   in
-  Eio_mock.Clock.set_time mock_clock 2.;
-  let v2 = Data.dummy_details (mock_clock :> Eio.Time.clock) in
+  set_time mock_clock 2.;
+  let v2 = Data.dummy_details mock_clock in
   let v2 =
     {
       v2 with
@@ -47,16 +57,18 @@ let tx =
     string_of_int !txid
 
 let add ~clock t v =
-  match Store.begin_transaction t ~clock v with
+  let* btx = Store.begin_transaction t ~clock v in
+  match btx with
   | Ok hash -> (
       let tx = tx () in
-      match Store.complete_transaction t ~clock ~hash ~tx with
+      let+ comp = Store.complete_transaction t ~clock ~hash ~tx in
+      match comp with
       | Ok _c -> ()
       | Error (`Msg e) -> failwith e
       | Error `Not_pending -> failwith "Not pending")
   | Error tx -> Store.tx_error_to_string tx |> failwith
 
-let add_items ~clock store items = List.iter (add ~clock store) items
+let add_items ~clock store items = Lwt_list.iter_s (add ~clock store) items
 
 let with_store ?(empty = true) ~name ~clock fn =
   (* Ensure config uniqueness! *)
@@ -67,13 +79,23 @@ let with_store ?(empty = true) ~name ~clock fn =
   (* Option.iter
      (fun v -> Printf.printf "ROOT: %s\n%!" v)
      (Irmin.Backend.Conf.find_root config); *)
-  let store = Store.v config in
-  if not empty then add_items ~clock store projects;
+  let* store = Store.v config in
+  let* () =
+    if not empty then add_items ~clock store projects else Lwt.return_unit
+  in
   fn store
 
 let () =
-  Eio_main.run @@ fun env ->
-  with_store ~name:"csv-store" ~clock:env#clock @@ fun s ->
-  add_items ~clock:env#clock s projects;
-  Printf.printf "%s\n\n%!" (Store.csv_by_flight s ~year:1970 ~month:1);
-  Printf.printf "%s%!" (Store.csv_by_finance s ~year:1970 ~month:1)
+  let clock =
+    object
+      method now = Unix.gettimeofday ()
+    end
+  in
+  Lwt_main.run
+  @@ with_store ~name:"csv-store" ~clock
+  @@ fun s ->
+  let* () = add_items ~clock s projects in
+  let* csv_flights = Store.csv_by_flight s ~year:1970 ~month:1 in
+  let+ csv_finance = Store.csv_by_finance s ~year:1970 ~month:1 in
+  Printf.printf "%s\n\n%!" csv_flights;
+  Printf.printf "%s%!" csv_finance

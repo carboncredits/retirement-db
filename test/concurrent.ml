@@ -1,3 +1,4 @@
+open Lwt.Syntax
 open Retirement
 
 module I = struct
@@ -6,37 +7,46 @@ end
 
 module Store = Store.Make (I)
 
-let with_store ~fs:_ fn =
+let with_store fn =
   let config = Irmin_fs.config "./tmp" in
   let s = Store.v config in
   Fun.protect
-    (fun () -> fn s)
+    (fun () ->
+      let* s = s in
+      fn s)
     ~finally:(fun () -> Sys.command "rm -rf ./tmp" |> ignore)
 
 let check_content ~hash store =
-  assert (Option.is_some @@ Store.find store ~hash)
+  let+ find = Store.find store ~hash in
+  assert (Option.is_some find)
 
-let concurrent_completions ~clock fs =
-  with_store ~fs @@ fun store ->
+let concurrent_completions ~clock =
+  with_store @@ fun store ->
   let details = Retirement.Data.dummy_details clock in
-  match Store.begin_transaction ~clock store details with
+  let* id = Store.begin_transaction ~clock store details in
+  match id with
   | Error _ -> failwith "Begin tx failed!"
   | Ok s ->
-      check_content ~hash:s store;
-      Eio.traceln "Successfully started tx: %s" s;
+      let* () = check_content ~hash:s store in
+      Fmt.pr "Successfully started tx: %s" s;
       let complete () =
         Store.complete_transaction ~clock store ~hash:s ~tx:"WOOOHOOOO"
       in
-      let res = Eio.Fiber.List.map ~max_fibers:10 complete [ (); () ] in
+      let res = Lwt_list.map_p complete [ (); () ] in
       res
 
+let mock_clock =
+  object
+    method now = 0.
+  end
+
 let () =
-  Eio_main.run @@ fun env ->
-  Eio.traceln "<><><><><><><><> Concurrency Test <><><><><><><><>\n";
-  let clock = Eio_mock.Clock.make () in
-  Irmin_fs.run env#fs @@ fun () ->
-  let res = concurrent_completions ~clock:(clock :> Eio.Time.clock) env#fs in
-  match res with
-  | [ Ok _; Error _ ] -> Eio.traceln "Concurrent Test Passed\n"
-  | [ Error _; Ok _ ] -> Eio.traceln "Concurrent Test Passed\n"
-  | _ -> failwith "Store concurrency is broken!"
+  let main =
+    Fmt.pr "<><><><><><><><> Concurrency Test <><><><><><><><>\n";
+    let+ res = concurrent_completions ~clock:mock_clock in
+    match res with
+    | [ Ok _; Error _ ] -> Fmt.pr "Concurrent Test Passed\n"
+    | [ Error _; Ok _ ] -> Fmt.pr "Concurrent Test Passed\n"
+    | _ -> failwith "Store concurrency is broken!"
+  in
+  Lwt_main.run main

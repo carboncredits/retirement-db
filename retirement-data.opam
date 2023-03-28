@@ -19,5 +19,5 @@ depends: [
 synopsis: "Project metadata JSON codec and types"
 pin-depends:[
   [ "ppx_repr.dev" "git+https://github.com/mirage/repr#2b260367d8073a421e38be4e564d2c1931d15ee0"]
-  [ "ppx_irmin.dev" "git+https://github.com/patricoferris/irmin#ecfabf46357d19316f969bf8b8c578355b322c55" ]
+  [ "ppx_irmin.dev" "git+https://github.com/patricoferris/irmin#448d61583cbac0f69b466665f9d3cb835144f400" ]
 ]

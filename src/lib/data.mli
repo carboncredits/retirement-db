@@ -30,7 +30,21 @@ type finance_details =
   [ `Grant of Retirement_data.Types.grant_details
   | `CostCentre of Retirement_data.Types.cost_centre_details ]
 
-val current_ts : Eio.Time.clock -> string
+module Time : sig
+  class virtual ['a] clock_base :
+    object
+      method virtual now : 'a
+    end
+
+  class virtual clock :
+    object
+      inherit [float] clock_base
+    end
+
+  val now : #clock -> float
+end
+
+val current_ts : #Time.clock -> string
 (** Current time in RFC3339 format. *)
 
 val ts_to_date : string -> int * int * int
@@ -94,7 +108,7 @@ val v :
 (** [v ?version details] constructs a new retirement data. If [version] is omitted, the
     latest version will be used. *)
 
-val dummy_details : ?tx_id:string -> ?timestamp:string -> Eio.Time.clock -> t
+val dummy_details : ?tx_id:string -> ?timestamp:string -> #Time.clock -> t
 (** Useful for tests and debugging. *)
 
 include Irmin.Contents.S with type t := t

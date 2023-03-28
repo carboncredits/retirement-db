@@ -81,8 +81,22 @@ type finance_details =
   [ `Grant of Retirement_data.Types.grant_details
   | `CostCentre of Retirement_data.Types.cost_centre_details ]
 
+module Time = struct
+  class virtual ['a] clock_base =
+    object
+      method virtual now : 'a
+    end
+
+  class virtual clock =
+    object
+      inherit [float] clock_base
+    end
+
+  let now (c : #clock) = c#now
+end
+
 let current_ts clock =
-  Eio.Time.now clock |> Ptime.of_float_s |> Option.get |> Ptime.to_rfc3339
+  Time.now clock |> Ptime.of_float_s |> Option.get |> Ptime.to_rfc3339
 
 let ts_to_date ts =
   let t, _, _ = Ptime.of_rfc3339 ts |> Result.get_ok in
@@ -248,7 +262,7 @@ let dummy_details ?tx_id ?timestamp clock =
     (`Grant dummy_grant_details) dummy_travel_details dummy_offset
 
 let details t = t.T.details
-let merge' ~old:_ t _t2 = Ok t
+let merge' ~old:_ t _t2 = Lwt.return @@ Ok t
 let merge = Irmin.Merge.(option (v t merge'))
 
 module Rest = struct
